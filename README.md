@@ -1,5 +1,21 @@
 # backend_findUS
 
+## Correr el swagger del proyecto
+
+- Hacer `npm install`, si no ha instalado las dependencias del proyecto
+- Primero, correr el comando `npm run swagger`
+- Luego, correr el comando `npm start`
+- Por último, abrir la ruta `http://localhost:3000/api-docs`
+
+## Actualizar esquema de prisma
+
+- Correr el comando `npx prisma db pull`
+
+## Abrir Interfaz de Prisma
+
+- Correr el comando `npx prisma studio`
+
+## Estructura del Proyecto
 project-root/
 ├── controllers/
 │   ├── userController.js
@@ -17,8 +33,5 @@ project-root/
 │   ├── userRoutes.js
 │   ├── productRoutes.js
 │   └── orderRoutes.js
-├── database/
-│   ├── connection.js
-│   └── migrations/
 ├── app.js
 └── server.js
