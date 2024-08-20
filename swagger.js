@@ -1,11 +1,11 @@
 const swaggerAutogen = require('swagger-autogen')();
-
+const PORT = process.env.PORT || 3000;
 const doc = {
   info: {
-    title: 'My API',
-    description: 'Description'
+    title: 'FindUS API',
+    description: 'Este es el SWAGGER de la API de FindUS, donde se podrá encontrar información sobre los endpoints y sus respectivas respuestas.',
   },
-  host: 'localhost:3000'
+  host: `localhost:${PORT}`
 };
 
 const outputFile = './swagger-output.json';
