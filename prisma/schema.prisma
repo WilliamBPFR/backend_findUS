@@ -27,22 +27,6 @@ model avistamiento {
   @@index([idUsuario], map: "idUsuario")
 }
 
-model cambiarcontrase_a {
-  id                    Int       @id @default(autoincrement())
-  IdUsuario             Int?
-  codigoVerificacion    String?   @db.VarChar(255)
-  IdEstatus             Int?
-  fechaCreacion         DateTime? @db.DateTime(0)
-  fechaExpiracionCodigo DateTime? @db.DateTime(0)
-  vigente               Boolean?  @db.Bit(1)
-  usuario               usuario?  @relation(fields: [IdUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cambiarcontraseña_ibfk_1")
-  estado                estado?   @relation(fields: [IdEstatus], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cambiarcontraseña_ibfk_2")
-
-  @@index([IdEstatus], map: "IdEstatus")
-  @@index([IdUsuario], map: "IdUsuario")
-  @@map("cambiarcontraseña")
-}
-
 model categoriamaterial {
   id                      Int                @id @default(autoincrement())
   nombreCategoriaMaterial String?            @db.VarChar(255)
@@ -82,7 +66,7 @@ model estado {
   tipoEstado        String?             @db.VarChar(255)
   fechaCreacion     DateTime?           @db.DateTime(0)
   avistamiento      avistamiento[]
-  cambiarcontrase_a cambiarcontrase_a[]
+  cambiarcontrasena cambiarcontrasena[]
   publicacion       publicacion[]
   usuario           usuario[]
 }
@@ -121,8 +105,8 @@ model publicacion {
   fechaDesaparicion              DateTime?             @db.DateTime(0)
   descripcionPersonaDesaparecido String?               @db.VarChar(255)
   relacionUsuarioConDesaparecido String?               @db.VarChar(255)
-  informaci_nContacto            String?               @map("informaciónContacto") @db.VarChar(255)
-  ubicaci_n_desaparicion         Unsupported("point")? @map("ubicación_desaparicion")
+  informacionContacto            String?               @db.VarChar(255)
+  ubicacion_desaparicion         Unsupported("point")?
   Verificado                     Boolean?
   idEstado                       Int?
   fechaCreacion                  DateTime?             @db.DateTime(0)
@@ -181,7 +165,7 @@ model usuario {
   nombre                    String?             @db.VarChar(255)
   apellido                  String?             @db.VarChar(255)
   email                     String?             @db.VarChar(255)
-  hash_contrase_a           String?             @map("hash_contraseña") @db.VarChar(255)
+  hash_contrasena           String?             @db.VarChar(255)
   fechaNacimiento           DateTime?           @db.DateTime(0)
   numeroTelefono            String?             @db.VarChar(255)
   urlFotoPerfil             String?             @db.VarChar(255)
@@ -193,7 +177,7 @@ model usuario {
   idEstado                  Int?
   fechaCreacion             DateTime?           @db.DateTime(0)
   avistamiento              avistamiento[]
-  cambiarcontrase_a         cambiarcontrase_a[]
+  cambiarcontrasena         cambiarcontrasena[]
   chatpublicacion           chatpublicacion[]
   comentario                comentario[]
   publicacion               publicacion[]
@@ -205,4 +189,19 @@ model usuario {
   @@index([IdTipoDocumento], map: "IdTipoDocumento")
   @@index([idEstado], map: "idEstado")
   @@index([idRol], map: "idRol")
+}
+
+model cambiarcontrasena {
+  id                    Int       @id @default(autoincrement())
+  IdUsuario             Int?
+  codigoVerificacion    String?   @db.VarChar(255)
+  IdEstatus             Int?
+  fechaCreacion         DateTime? @db.DateTime(0)
+  fechaExpiracionCodigo DateTime? @db.DateTime(0)
+  vigente               Boolean?  @db.Bit(1)
+  usuario               usuario?  @relation(fields: [IdUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cambiarcontrasena_ibfk_1")
+  estado                estado?   @relation(fields: [IdEstatus], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cambiarcontrasena_ibfk_2")
+
+  @@index([IdEstatus], map: "IdEstatus")
+  @@index([IdUsuario], map: "IdUsuario")
 }
