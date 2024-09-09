@@ -9,7 +9,9 @@
 
 ## Actualizar esquema de prisma
 
-- Correr el comando `npx prisma db pull`
+- Primero, correr el comando `npx prisma db pull`
+- Luego, correr el comando `npx prisma generate`
+
 
 ## Abrir Interfaz de Prisma
 
