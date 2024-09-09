@@ -14,7 +14,12 @@ const verifyPassword = async (password, hashedPassword) => {
     return match;
 };
 
+function generateVerificationCode(number_of_digits) {
+    return Math.floor((Math.pow(10,number_of_digits-1)) + Math.random() * (9*(Math.pow(10,number_of_digits-1)))).toString();
+}
+
 module.exports = {
     hashPassword,
-    verifyPassword
+    verifyPassword,
+    generateVerificationCode
 };
