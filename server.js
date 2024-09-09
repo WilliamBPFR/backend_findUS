@@ -10,6 +10,6 @@ const PORT = process.env.PORT || 3000;
 // Configurar Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0',() => {
     console.log(`Server running on port ${PORT}`);
 });

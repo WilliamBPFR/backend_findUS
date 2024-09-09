@@ -3,206 +3,186 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model avistamiento {
   id                Int                   @id @default(autoincrement())
-  idUsuario         Int?
-  idPublicacion     Int?
+  idusuario         Int?
+  idpublicacion     Int?
   ubicacion         Unsupported("point")?
-  fechaHora         DateTime?             @db.DateTime(0)
+  fechahora         DateTime?             @db.Timestamp(6)
   detalles          String?               @db.VarChar(255)
-  Verificado        Boolean?
-  IdEstatus         Int?
-  fechaCreacion     DateTime?             @db.DateTime(0)
-  usuario           usuario?              @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "avistamiento_ibfk_1")
-  publicacion       publicacion?          @relation(fields: [idPublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "avistamiento_ibfk_2")
-  estado            estado?               @relation(fields: [IdEstatus], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "avistamiento_ibfk_3")
+  verificado        Boolean?
+  idestatus         Int?
+  fechacreacion     DateTime?             @default(now()) @db.Timestamp(6)
+  estado            estado?               @relation(fields: [idestatus], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  publicacion       publicacion?          @relation(fields: [idpublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario           usuario?              @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
   fotosavistamiento fotosavistamiento[]
-
-  @@index([IdEstatus], map: "IdEstatus")
-  @@index([idPublicacion], map: "idPublicacion")
-  @@index([idUsuario], map: "idUsuario")
 }
 
-model cambiarcontrase_a {
+model cambiarcontrasena {
   id                    Int       @id @default(autoincrement())
-  IdUsuario             Int?
-  codigoVerificacion    String?   @db.VarChar(255)
-  IdEstatus             Int?
-  fechaCreacion         DateTime? @db.DateTime(0)
-  fechaExpiracionCodigo DateTime? @db.DateTime(0)
-  vigente               Boolean?  @db.Bit(1)
-  usuario               usuario?  @relation(fields: [IdUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cambiarcontraseña_ibfk_1")
-  estado                estado?   @relation(fields: [IdEstatus], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cambiarcontraseña_ibfk_2")
-
-  @@index([IdEstatus], map: "IdEstatus")
-  @@index([IdUsuario], map: "IdUsuario")
-  @@map("cambiarcontraseña")
+  idusuario             Int?
+  codigoverificacion    String?   @db.VarChar(255)
+  idestatus             Int?
+  fechacreacion         DateTime? @default(now()) @db.Timestamp(6)
+  fechaexpiracioncodigo DateTime? @db.Timestamp(6)
+  vigente               Boolean?
+  estado                estado?   @relation(fields: [idestatus], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario               usuario?  @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model categoriamaterial {
   id                      Int                @id @default(autoincrement())
-  nombreCategoriaMaterial String?            @db.VarChar(255)
-  fechaCreacion           DateTime?          @db.DateTime(0)
+  nombrecategoriamaterial String?            @db.VarChar(255)
+  fechacreacion           DateTime?          @default(now()) @db.Timestamp(6)
   recursoeducativo        recursoeducativo[]
 }
 
 model chatpublicacion {
   id            Int          @id @default(autoincrement())
-  idUsuario     Int?
-  idPublicacion Int?
+  idusuario     Int?
+  idpublicacion Int?
   texto         String?      @db.VarChar(255)
-  fechaCreacion DateTime?    @db.DateTime(0)
-  usuario       usuario?     @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "chatpublicacion_ibfk_1")
-  publicacion   publicacion? @relation(fields: [idPublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "chatpublicacion_ibfk_2")
-
-  @@index([idPublicacion], map: "idPublicacion")
-  @@index([idUsuario], map: "idUsuario")
+  fechacreacion DateTime?    @default(now()) @db.Timestamp(6)
+  publicacion   publicacion? @relation(fields: [idpublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario       usuario?     @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model comentario {
   id            Int          @id @default(autoincrement())
-  idUsuario     Int?
-  idPublicacion Int?
+  idusuario     Int?
+  idpublicacion Int?
   texto         String?      @db.VarChar(255)
-  fechaCreacion DateTime?    @db.DateTime(0)
-  usuario       usuario?     @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comentario_ibfk_1")
-  publicacion   publicacion? @relation(fields: [idPublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "comentario_ibfk_2")
-
-  @@index([idPublicacion], map: "idPublicacion")
-  @@index([idUsuario], map: "idUsuario")
+  fechacreacion DateTime?    @default(now()) @db.Timestamp(6)
+  publicacion   publicacion? @relation(fields: [idpublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario       usuario?     @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model estado {
   id                Int                 @id @default(autoincrement())
-  nombreEstado      String?             @db.VarChar(255)
-  tipoEstado        String?             @db.VarChar(255)
-  fechaCreacion     DateTime?           @db.DateTime(0)
+  nombreestado      String?             @db.VarChar(255)
+  tipoestado        String?             @db.VarChar(255)
+  fechacreacion     DateTime?           @default(now()) @db.Timestamp(6)
   avistamiento      avistamiento[]
-  cambiarcontrase_a cambiarcontrase_a[]
+  cambiarcontrasena cambiarcontrasena[]
   publicacion       publicacion[]
+  recursoeducativo  recursoeducativo[]
   usuario           usuario[]
 }
 
 model fotosavistamiento {
   id             Int           @id @default(autoincrement())
-  urlArchivo     String?       @db.VarChar(255)
-  IdAvistamiento Int?
-  fechaCreacion  DateTime?     @db.DateTime(0)
-  avistamiento   avistamiento? @relation(fields: [IdAvistamiento], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fotosavistamiento_ibfk_1")
-
-  @@index([IdAvistamiento], map: "IdAvistamiento")
+  urlarchivo     String?       @db.VarChar(255)
+  idavistamiento Int?
+  fechacreacion  DateTime?     @default(now()) @db.Timestamp(6)
+  avistamiento   avistamiento? @relation(fields: [idavistamiento], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model fotospublicacion {
   id                    Int                  @id @default(autoincrement())
-  urlArchivo            String?              @db.VarChar(255)
-  IdTipoFotoPublicacion Int?
-  IdPublicacion         Int?
-  fechaCreacion         DateTime?            @db.DateTime(0)
-  tipofotopublicacion   tipofotopublicacion? @relation(fields: [IdTipoFotoPublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fotospublicacion_ibfk_1")
-  publicacion           publicacion?         @relation(fields: [IdPublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fotospublicacion_ibfk_2")
+  urlarchivo            String?              @db.VarChar(255)
+  idtipofotopublicacion Int?
+  idpublicacion         Int?
+  fechacreacion         DateTime?            @default(now()) @db.Timestamp(6)
+  publicacion           publicacion?         @relation(fields: [idpublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tipofotopublicacion   tipofotopublicacion? @relation(fields: [idtipofotopublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
 
-  @@index([IdPublicacion], map: "IdPublicacion")
-  @@index([IdTipoFotoPublicacion], map: "IdTipoFotoPublicacion")
+model idiomaaplicacion {
+  id            Int       @id @default(autoincrement())
+  nombreidioma  String?   @db.VarChar(255)
+  fechacreacion DateTime? @default(now()) @db.Timestamp(6)
 }
 
 model publicacion {
-  id                             Int                   @id @default(autoincrement())
-  idUsuario                      Int?
-  nombreDesaparecido             String?               @db.VarChar(255)
-  IdTipoDocumento                Int?
-  numeroDocumentoDesaparecido    String?               @db.VarChar(11)
-  edad                           Int?
-  telefono                       String?               @db.VarChar(10)
-  fechaDesaparicion              DateTime?             @db.DateTime(0)
-  descripcionPersonaDesaparecido String?               @db.VarChar(255)
-  relacionUsuarioConDesaparecido String?               @db.VarChar(255)
-  informaci_nContacto            String?               @map("informaciónContacto") @db.VarChar(255)
-  ubicaci_n_desaparicion         Unsupported("point")? @map("ubicación_desaparicion")
-  Verificado                     Boolean?
-  idEstado                       Int?
-  fechaCreacion                  DateTime?             @db.DateTime(0)
-  avistamiento                   avistamiento[]
-  chatpublicacion                chatpublicacion[]
-  comentario                     comentario[]
-  fotospublicacion               fotospublicacion[]
-  usuario                        usuario?              @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "publicacion_ibfk_1")
-  tipodocumento                  tipodocumento?        @relation(fields: [IdTipoDocumento], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "publicacion_ibfk_2")
-  estado                         estado?               @relation(fields: [idEstado], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "publicacion_ibfk_3")
-
-  @@index([IdTipoDocumento], map: "IdTipoDocumento")
-  @@index([idEstado], map: "idEstado")
-  @@index([idUsuario], map: "idUsuario")
+  id                              Int                @id @default(autoincrement())
+  idusuario                       Int?
+  nombredesaparecido              String?            @db.VarChar(255)
+  idtipodocumento                 Int?
+  numerodocumentodesaparecido     String?            @db.VarChar(11)
+  edad                            Int?
+  telefono                        String?            @db.VarChar(10)
+  fechadesaparicion               DateTime?          @db.Timestamp(6)
+  descripcionpersonadesaparecido  String?            @db.VarChar(255)
+  relacionusuariocondesaparecido  String?            @db.VarChar(255)
+  informacioncontacto             String?            @db.VarChar(255)
+  ubicaci_n_desaparicion_latitud  String?            @map("ubicación_desaparicion_latitud") @db.VarChar(255)
+  ubicaci_n_desaparicion_longitud String?            @map("ubicación_desaparicion_longitud") @db.VarChar(255)
+  verificado                      Boolean?
+  idestado                        Int?
+  fechacreacion                   DateTime?          @default(now()) @db.Timestamp(6)
+  avistamiento                    avistamiento[]
+  chatpublicacion                 chatpublicacion[]
+  comentario                      comentario[]
+  fotospublicacion                fotospublicacion[]
+  estado                          estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tipodocumento                   tipodocumento?     @relation(fields: [idtipodocumento], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario                         usuario?           @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model recursoeducativo {
   id                  Int                @id @default(autoincrement())
-  idUsuario           Int?
-  idCategoriaMaterial Int?
+  idusuario           Int?
+  idcategoriamaterial Int?
   nombre              String?            @db.VarChar(255)
   descripcion         String?            @db.VarChar(255)
-  urlMaterial         String?            @db.VarChar(255)
-  fechaCreacion       DateTime?          @db.DateTime(0)
-  usuario             usuario?           @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "recursoeducativo_ibfk_1")
-  categoriamaterial   categoriamaterial? @relation(fields: [idCategoriaMaterial], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "recursoeducativo_ibfk_2")
-
-  @@index([idCategoriaMaterial], map: "idCategoriaMaterial")
-  @@index([idUsuario], map: "idUsuario")
+  idestado            Int?
+  urlmaterial         String?            @db.VarChar(255)
+  fechacreacion       DateTime?          @default(now()) @db.Timestamp(6)
+  categoriamaterial   categoriamaterial? @relation(fields: [idcategoriamaterial], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  estado              estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuario             usuario?           @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model rol {
   id            Int       @id @default(autoincrement())
-  nombreRol     String?   @db.VarChar(255)
-  fechaCreacion DateTime? @db.DateTime(0)
+  nombrerol     String?   @db.VarChar(255)
+  fechacreacion DateTime? @default(now()) @db.Timestamp(6)
   usuario       usuario[]
 }
 
 model tipodocumento {
   id                  Int           @id @default(autoincrement())
-  nombreTipoDocumento String?       @db.VarChar(255)
-  fechaCreacion       DateTime?     @db.DateTime(0)
+  nombretipodocumento String?       @db.VarChar(255)
+  fechacreacion       DateTime?     @default(now()) @db.Timestamp(6)
   publicacion         publicacion[]
   usuario             usuario[]
 }
 
 model tipofotopublicacion {
   id                        Int                @id @default(autoincrement())
-  nombreTipoFotoPublicacion String?            @db.VarChar(255)
-  fechaCreacion             DateTime?          @db.DateTime(0)
+  nombretipofotopublicacion String?            @db.VarChar(255)
+  fechacreacion             DateTime?          @default(now()) @db.Timestamp(6)
   fotospublicacion          fotospublicacion[]
 }
 
 model usuario {
   id                        Int                 @id @default(autoincrement())
+  idauthusuario             String?             @db.VarChar(255)
   nombre                    String?             @db.VarChar(255)
   apellido                  String?             @db.VarChar(255)
   email                     String?             @db.VarChar(255)
-  hash_contrase_a           String?             @map("hash_contraseña") @db.VarChar(255)
-  fechaNacimiento           DateTime?           @db.DateTime(0)
-  numeroTelefono            String?             @db.VarChar(255)
-  urlFotoPerfil             String?             @db.VarChar(255)
-  Verificado                Boolean?
-  codigoVerificacionUsuario String?             @db.VarChar(255)
-  IdTipoDocumento           Int?
-  numeroDocumento           String?             @db.VarChar(255)
-  idRol                     Int?
-  idEstado                  Int?
-  fechaCreacion             DateTime?           @db.DateTime(0)
+  fechanacimiento           DateTime?           @db.Timestamp(6)
+  numerotelefono            String?             @db.VarChar(255)
+  urlfotoperfil             String?             @db.VarChar(255)
+  verificado                Boolean?
+  codigoverificacionusuario String?             @db.VarChar(255)
+  idtipodocumento           Int?
+  numerodocumento           String?             @db.VarChar(255)
+  idrol                     Int?
+  idestado                  Int?
+  fechacreacion             DateTime?           @default(now()) @db.Timestamp(6)
   avistamiento              avistamiento[]
-  cambiarcontrase_a         cambiarcontrase_a[]
+  cambiarcontrasena         cambiarcontrasena[]
   chatpublicacion           chatpublicacion[]
   comentario                comentario[]
   publicacion               publicacion[]
   recursoeducativo          recursoeducativo[]
-  tipodocumento             tipodocumento?      @relation(fields: [IdTipoDocumento], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "usuario_ibfk_1")
-  rol                       rol?                @relation(fields: [idRol], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "usuario_ibfk_2")
-  estado                    estado?             @relation(fields: [idEstado], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "usuario_ibfk_3")
-
-  @@index([IdTipoDocumento], map: "IdTipoDocumento")
-  @@index([idEstado], map: "idEstado")
-  @@index([idRol], map: "idRol")
+  estado                    estado?             @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  rol                       rol?                @relation(fields: [idrol], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tipodocumento             tipodocumento?      @relation(fields: [idtipodocumento], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
