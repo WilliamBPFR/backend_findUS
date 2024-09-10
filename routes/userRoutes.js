@@ -3,7 +3,8 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const {authenticate} = require('../routes/routeAutenthicationService');
 
-router.get('/user/:id', userController.getUser);
+router.get('/user/:id', userController.getUserById);
+router.get('/user', userController.getAllUser);
 router.post('/user/registrar_usuario', userController.registrar_usuario);
 router.post('/user/confirmar_correo', userController.confirmar_correo);
 router.post('/user/login', userController.login_usuario);
