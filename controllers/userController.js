@@ -128,6 +128,8 @@ const verificar_codigo_cambio_contrasena = async (req, res) => {
         }
     */
     try {
+        console.log("PARASVERIFICARRRRR")
+        console.log(req.body);
         const verificado = await userModel.verificarOTP(req.body.email, req.body.codigoVerificacion, "recovery");
         if(verificado.verificado){
             return res.status(200).json({ message: "Código Válido", token: verificado.token });
@@ -159,12 +161,15 @@ const cambiar_contrasena = async (req, res) => {
         const verificado = await userModel.cambiarContrasenaUsuario(req.body.contrasena,req.user.id);
         if(verificado.verificado){
             return res.status(200).json({ message: "Contraseña cambiada correctamente" });
+        }else{
+            if(verificado.message == "otp_expired"){
+                return res.status(400).json({ message: "Código Inválido. Verifíquelo e inténtelo de nuevo." });
+            }
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
 }
-
 
 const login_usuario = async (req, res) => {
     /* #swagger.tags = ['User']
