@@ -41,6 +41,20 @@ const crearUsuario = async (user_data) => {
     }
 }
 
+const getUserById = async (id) => {
+    const user = await prisma.usuario.findFirst({
+        where: {
+            id: id
+        }
+    });
+    return user;
+}
+
+const getAllUser = async () => {
+    const users = await prisma.usuario.findMany();
+    return users;
+}
+
 const usuarioExistnente = async (email, documentoIdentidad) => {
     const usuario_existente_email = await prisma.usuario.findFirst({
         where: {
@@ -196,6 +210,7 @@ const cambiarContrasenaUsuario = async (contrasena,userid) => {
 }
 
 const loginUsuario = async (email, contrasena) => {
+    console.log('Login Usuario:', email, contrasena);
     const usuario = await prisma.usuario.findFirst({
         where: {
             email: email
@@ -217,7 +232,7 @@ const loginUsuario = async (email, contrasena) => {
         }
 
         if(data){
-            return {message: "Usuario autenticado", autenticado: true, token: data?.session.access_token};
+            return {autenticado: true, message: "Usuario autenticado", token: data?.session.access_token};
         }
     }else{
         return {message: "Usuario no verificado", autenticado: false};
@@ -268,5 +283,7 @@ module.exports = {
     cambiarRolUsuario,
     solicitarCambiorContrasenaUsuario,
     cambiarContrasenaUsuario,
-    verificarUsuario
+    verificarUsuario,
+    getUserById,
+    getAllUser,
 };
