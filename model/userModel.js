@@ -127,13 +127,13 @@ const solicitarCambiorContrasenaUsuario = async (email,isresend = false) => {
             return {message: "Códiga ya había sido enviado y está vigente. Verifique su correo e introdúzcalo a continuación", verificado: true};
         }
     }
-    
+
     const {data,error} = await supabaseAnon.auth.resetPasswordForEmail(email);
     if(error){
         console.error('Error en la verificación del correo:', error);
         return { verificado: false, message: error.code };
     }
-    if(data){
+    if(data && !isresend){
         console.log(data);
         const user = await prisma.usuario.findFirst({
             where: {
@@ -145,19 +145,21 @@ const solicitarCambiorContrasenaUsuario = async (email,isresend = false) => {
                 data: {
                     idusuario: user.id,
                     idestatus: 1,
-                    fechaexpiracioncodigo: new Date(new Date().setHours(new Date().getHours() + 6)),
+                    fechaexpiracioncodigo: new Date(new Date().setHours(new Date().getHours() + 1)),
                     vigente: true,
                 }
             })
         }
         return {message: "Código Enviado", verificado: true};
+    }else if(data && isresend){
+        return {message: "Código Reenviado", verificado: true};
     }
 }
 
 const cambiarContrasenaUsuario = async (contrasena,userid) => {
     const {data,error} = await supabaseAdmin.auth.admin.updateUserById(userid,{password: contrasena});
     if(error){
-        console.error('Error en la verificación del correo:', error);
+        console.error('Error en el cambio de contrasena:', error);
         return { verificado: false, message: error.code };
     }
 
