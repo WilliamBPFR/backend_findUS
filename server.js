@@ -4,7 +4,6 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger-output.json'); // Cargar el archivo JSON generado
 
-
 const PORT = process.env.PORT || 3000;
 
 // Configurar Swagger UI

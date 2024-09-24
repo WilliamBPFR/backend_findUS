@@ -41,6 +41,20 @@ const crearUsuario = async (user_data) => {
     }
 }
 
+const getUserById = async (id) => {
+    const user = await prisma.usuario.findFirst({
+        where: {
+            id: id
+        }
+    });
+    return user;
+}
+
+const getAllUser = async () => {
+    const users = await prisma.usuario.findMany();
+    return users;
+}
+
 const usuarioExistnente = async (email, documentoIdentidad) => {
     const usuario_existente_email = await prisma.usuario.findFirst({
         where: {
@@ -127,13 +141,13 @@ const solicitarCambiorContrasenaUsuario = async (email,isresend = false) => {
             return {message: "Códiga ya había sido enviado y está vigente. Verifique su correo e introdúzcalo a continuación", verificado: true};
         }
     }
-    
+
     const {data,error} = await supabaseAnon.auth.resetPasswordForEmail(email);
     if(error){
         console.error('Error en la verificación del correo:', error);
         return { verificado: false, message: error.code };
     }
-    if(data){
+    if(data && !isresend){
         console.log(data);
         const user = await prisma.usuario.findFirst({
             where: {
@@ -145,19 +159,21 @@ const solicitarCambiorContrasenaUsuario = async (email,isresend = false) => {
                 data: {
                     idusuario: user.id,
                     idestatus: 1,
-                    fechaexpiracioncodigo: new Date(new Date().setHours(new Date().getHours() + 6)),
+                    fechaexpiracioncodigo: new Date(new Date().setHours(new Date().getHours() + 1)),
                     vigente: true,
                 }
             })
         }
         return {message: "Código Enviado", verificado: true};
+    }else if(data && isresend){
+        return {message: "Código Reenviado", verificado: true};
     }
 }
 
 const cambiarContrasenaUsuario = async (contrasena,userid) => {
     const {data,error} = await supabaseAdmin.auth.admin.updateUserById(userid,{password: contrasena});
     if(error){
-        console.error('Error en la verificación del correo:', error);
+        console.error('Error en el cambio de contrasena:', error);
         return { verificado: false, message: error.code };
     }
 
@@ -196,6 +212,7 @@ const cambiarContrasenaUsuario = async (contrasena,userid) => {
 }
 
 const loginUsuario = async (email, contrasena) => {
+    console.log('Login Usuario:', email, contrasena);
     const usuario = await prisma.usuario.findFirst({
         where: {
             email: email
@@ -217,7 +234,7 @@ const loginUsuario = async (email, contrasena) => {
         }
 
         if(data){
-            return {message: "Usuario autenticado", autenticado: true, token: data?.session.access_token};
+            return {autenticado: true, message: "Usuario autenticado", token: data?.session.access_token};
         }
     }else{
         return {message: "Usuario no verificado", autenticado: false};
@@ -268,5 +285,7 @@ module.exports = {
     cambiarRolUsuario,
     solicitarCambiorContrasenaUsuario,
     cambiarContrasenaUsuario,
-    verificarUsuario
+    verificarUsuario,
+    getUserById,
+    getAllUser,
 };
