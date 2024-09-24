@@ -79,7 +79,7 @@ const confirmar_correo = async (req, res) => {
             console.log(updb);
             return res.status(200).json({ message: "Usuario Verificado" });
         }else if(verificado.message == "otp_expired"){
-            return res.status(400).json({ message: "Código Inválido. Verifiquelo e inténtelo de nuevi." });
+            return res.status(400).json({ message: "Código Inválido. Verifiquelo e inténtelo de nuevo." });
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
