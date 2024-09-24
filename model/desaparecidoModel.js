@@ -1,37 +1,38 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { supabaseAnon} = require('../services/supabaseService');	
 
 // Crear un nuevo desaparecido
 const crearDesaparecido = async (desaparecido_data) => {
     const desaparecido = await prisma.publicacion.create({
         data: {
-            idUsuario: desaparecido_data.idUsuario,
-            nombreDesaparecido: desaparecido_data.nombreDesaparecido,
-            idTipoDocumento: desaparecido_data.idTipoDocumento,
-            numeroDocumento: desaparecido_data.numeroDocumento,
-            edad: desaparecido_data.edad,
+            idusuario: desaparecido_data.idusuario, // aparte
+            nombredesaparecido: desaparecido_data.nombre_desaparecido,
+            idtipodocumento: desaparecido_data.id_tipo_Documento,
+            numerodocumentodesaparecido: desaparecido_data.documento_desaparecido,
+            edad: desaparecido_data.edad, // aparte
             telefono: desaparecido_data.telefono,
-            fechaDesaparicion: new Date(desaparecido_data.fechaDesaparicion),
-            descripcionDesaparecido: desaparecido_data.descripcionDesaparecido,
-            relacionDesaparecido: desaparecido_data.relacionDesaparecido,
-            informacionContacto: desaparecido_data.informacionContacto,
-            ubicacionDesaparicion: desaparecido_data.ubicacionDesaparicion,
-            verificado: desaparecido_data.verificado,
-            fechaNacimiento: new Date(desaparecido_data.fechaNacimiento),
-            lugarDesaparicion: desaparecido_data.lugarDesaparicion,
-            idEstado: desaparecido_data.idEstado,
-            fechaCreacion: new Date(desaparecido_data.fechaCreacion),
+            fechadesaparicion: new Date(desaparecido_data.fecha_desaparicion),
+            descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
+            relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
+            informacioncontacto: desaparecido_data.contacto,
+            ubicaci_n_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
+            ubicaci_n_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+            verificado: false,
+            fechanacimiento: new Date(desaparecido_data.fecha_nacimiento),
+            idestado: 1,
+            fechacreacion: new Date(),
         }
     });
     return desaparecido;
 }
 
 // Verificar si el desaparecido ya existe
-const desaparecidoExistente = async (nombre, fechaNacimiento) => {
+const desaparecidoExistente = async (idtipodocumento, numerodocumento) => {
     const desaparecido_existente = await prisma.publicacion.findFirst({
         where: {
-            nombre: nombre,
-            fechaNacimiento: new Date(fechaNacimiento),
+            idtipodocumento: idtipodocumento,
+            numerodocumento: numerodocumento,
         }
     });
 
