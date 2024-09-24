@@ -2,11 +2,21 @@ const userModel = require('../model/userModel');
 const emailService = require('../services/emailService');
 const userService = require('../services/userService');
 
-const getUser = async (req, res) => {
+const getUserById = async (req, res) => {
     // #swagger.tags = ['User']
     try {
-        const user = await userService.getUserById(req.params.id);
+        const user = await userModel.getUserById(req.params.id);
         res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getAllUser = async (req, res) => {
+    // #swagger.tags = ['User']
+    try {
+        const users = await userModel.getAllUser();
+        res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -69,7 +79,7 @@ const confirmar_correo = async (req, res) => {
             console.log(updb);
             return res.status(200).json({ message: "Usuario Verificado" });
         }else if(verificado.message == "otp_expired"){
-            return res.status(400).json({ message: "Código Inválido. Verifiquelo e inténtelo de nuevi." });
+            return res.status(400).json({ message: "Código Inválido. Verifiquelo e inténtelo de nuevo." });
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -118,6 +128,8 @@ const verificar_codigo_cambio_contrasena = async (req, res) => {
         }
     */
     try {
+        console.log("PARASVERIFICARRRRR")
+        console.log(req.body);
         const verificado = await userModel.verificarOTP(req.body.email, req.body.codigoVerificacion, "recovery");
         if(verificado.verificado){
             return res.status(200).json({ message: "Código Válido", token: verificado.token });
@@ -149,12 +161,15 @@ const cambiar_contrasena = async (req, res) => {
         const verificado = await userModel.cambiarContrasenaUsuario(req.body.contrasena,req.user.id);
         if(verificado.verificado){
             return res.status(200).json({ message: "Contraseña cambiada correctamente" });
+        }else{
+            if(verificado.message == "otp_expired"){
+                return res.status(400).json({ message: "Código Inválido. Verifíquelo e inténtelo de nuevo." });
+            }
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
 }
-
 
 const login_usuario = async (req, res) => {
     /* #swagger.tags = ['User']
@@ -173,7 +188,7 @@ const login_usuario = async (req, res) => {
         const usuario = await userModel.loginUsuario(req.body.email, req.body.contrasena);
         if(usuario.autenticado){
             console.log(usuario);
-            return res.status(200).json({ message: "Usuario logueado correctamente", token: usuario.token });
+            return res.status(200).json({ message: "Usuario logueado correctamente", token: usuario.token, autenticado: true, });
         }else{
             return res.status(400).json({ message: "Correo o Contraseña incorrecta. Revise e intente de nuevo"  }); //usuario.message.includes("Invalid login credentials") ? "Contraseña o Correo" : usuario.message
         }
@@ -236,7 +251,6 @@ const modificar_rol_Usuario = async (req, res) => {
 }
 
 module.exports = {
-    getUser,
     registrar_usuario,
     confirmar_correo,
     login_usuario,
@@ -244,5 +258,7 @@ module.exports = {
     modificar_rol_Usuario,
     solicitar_cambio_contrasena,
     verificar_codigo_cambio_contrasena,
-    cambiar_contrasena
+    cambiar_contrasena,
+    getAllUser,
+    getUserById
 };

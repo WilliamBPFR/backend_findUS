@@ -9,28 +9,27 @@ const createDesaparecido = async (req, res) => {
               description: 'Información del desaparecido.',
               required: true,
               schema: {
-                 idUsuario: 1,
-                 nombre: 'Juan',
-                 idTipoDocumento: 1,
-                 numeroDocumento: '1234567890',
-                 edad: 20,
-                 telefonoContacto: '1234567890',
-                 fechaDesaparicion: '2021-01-01',
-                 descripcionDesaparecido: 'Desapareció en la noche',
-                 relacionDesaparecido: 'Hermano',
-                 informacionContacto: 'Llamar a este número',
-                 ubicacionDesaparicion: 'Bogotá',
-                 verificado: true,
-                 fechaNacimiento: '2000-01-01',
-                 lugarDesaparicion: 'Bogotá',
-                 idEstado: 1,
-                 fechaCreacion: '2021-01-01',
-              }
+                    idusuario: 1,
+                    nombredesaparecido: 'Juan Perez',
+                    idtipodocumento: 1,
+                    numerodocumentodesaparecido: '1234567890',
+                    edad: 30,
+                    telefono: '1234567890',
+                    fechadesaparicion: '2021-01-01',
+                    descripcionpersonadesaparecido: 'Persona desaparecida',
+                    relacionusuariocondesaparecido: 'Padre',
+                    informacioncontacto: '1234567890',
+                    ubicaci_n_desaparicion_latitud: 0.0,
+                    ubicaci_n_desaparicion_longitud: 0.0,
+                    fechanacimiento: '1990-01-01',
+                    fechacreacion: '2021-01-01',
+                    idestado: 1,
+                }
          }
 
     */
     try {
-        const existe = await desaparecidoModel.desaparecidoExistente(numeroDocumento);
+        const existe = await desaparecidoModel.desaparecidoExistente(idtipodocumento,numerodocumento);
         if(existe.existe){
             return res.status(400).json({ message: existe.message });
         }
