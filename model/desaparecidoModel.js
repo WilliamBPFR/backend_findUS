@@ -1,45 +1,56 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const { supabaseAnon} = require('../services/supabaseService');	
+const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
 
 // Crear un nuevo desaparecido
 const crearDesaparecido = async (desaparecido_data) => {
-    const desaparecido = await prisma.publicacion.create({
-        data: {
-            idusuario: desaparecido_data.idusuario, // aparte
-            nombredesaparecido: desaparecido_data.nombre_desaparecido,
-            idtipodocumento: desaparecido_data.id_tipo_Documento,
-            numerodocumentodesaparecido: desaparecido_data.documento_desaparecido,
-            edad: desaparecido_data.edad, // aparte
-            telefono: desaparecido_data.telefono,
-            fechadesaparicion: new Date(desaparecido_data.fecha_desaparicion),
-            descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
-            relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
-            informacioncontacto: desaparecido_data.contacto,
-            ubicaci_n_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
-            ubicaci_n_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
-            verificado: false,
-            fechanacimiento: new Date(desaparecido_data.fecha_nacimiento),
-            idestado: 1,
-            fechacreacion: new Date(),
-        }
-    });
-    return desaparecido;
-}
+    try{
+        const desaparecido = await prisma.publicacion.create({
+            data: {
+                usuario: {
+                    connect: { id: desaparecido_data.idusuario } // Conectar con el usuario usando su ID
+                },
+                nombredesaparecido: desaparecido_data.nombre_desaparecido,
+                tipodocumento: {
+                    connect: { id: desaparecido_data.id_tipo_documento } // Conectar con el tipo de documento usando su ID
+                },
+                numerodocumentodesaparecido: desaparecido_data.documento_desaparecido,
+                edad: desaparecido_data.edad, // Valor directo (no relación)
+                telefono: desaparecido_data.telefono,
+                fechadesaparicion: desaparecido_data.fecha_desaparicion,
+                descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
+                relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
+                informacioncontacto: desaparecido_data.contacto,
+                ubicaci_n_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
+                ubicaci_n_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                verificado: false,
+                fechanacimiento: desaparecido_data.fecha_nacimiento,
+                estado: {
+                    connect: { id: desaparecido_data.idestado || 1 } // Conectar con el estado usando su ID, 1 como valor por defecto
+                },
+                fechacreacion: new Date(), // Generar la fecha actual
+            }
+        });
+        return { success: true, desaparecido };
+    } catch (error) {
+        console.error('Error al crear el desaparecido:', error);
+        return { success: false, error };
+    }
+};
 
 // Verificar si el desaparecido ya existe
-const desaparecidoExistente = async (idtipodocumento, numerodocumento) => {
+const desaparecidoExistente = async (idtipodocumento, numerodocumento, nombre) => {
     const desaparecido_existente = await prisma.publicacion.findFirst({
         where: {
             idtipodocumento: idtipodocumento,
-            numerodocumento: numerodocumento,
+            numerodocumentodesaparecido: numerodocumento,
         }
     });
 
     if (desaparecido_existente == null) {
         return { message: "", existe: false };
     } else {
-        return { message: `El desaparecido ${nombre} con fecha de nacimiento ${fechaNacimiento} ya existe`, existe: true };
+        return { message: `El desaparecido ${nombre} con fecha de nacimiento ${numerodocumento} ya existe`, existe: true };
     }
 }
 
@@ -83,5 +94,5 @@ module.exports = {
     getDesaparecidoById,
     getAllDesaparecidos,
     updateDesaparecido,
-    deleteDesaparecido
+    deleteDesaparecido,
 };

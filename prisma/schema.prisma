@@ -115,6 +115,7 @@ model publicacion {
   verificado                      Boolean?
   idestado                        Int?
   fechacreacion                   DateTime?          @default(now()) @db.Timestamp(6)
+  fechanacimiento                 DateTime?          @db.Timestamp(6)
   avistamiento                    avistamiento[]
   chatpublicacion                 chatpublicacion[]
   comentario                      comentario[]

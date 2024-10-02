@@ -29,17 +29,35 @@ const createDesaparecido = async (req, res) => {
 
     */
     try {
-        const existe = await desaparecidoModel.desaparecidoExistente(idtipodocumento,numerodocumento);
-        if(existe.existe){
-            return res.status(400).json({ message: existe.message });
-        }
-        else{
-            await desaparecidoModel.crearDesaparecido(req.body);
-            return res.status(200).json({ message: "Desaparecido creado exitosamente"});
-        }
-    } catch (error) {
+        const desaparecido = await desaparecidoModel.crearDesaparecido(req.body);
+            if(!desaparecido.success){
+                return res.status(400).json({ message: "Error al crear la publicación"});
+                
+            }
+            return res.status(200).json({ message: "Desaparecido creado exitosamente" });
+
+    } catch (error) { 
         return res.status(500).json({ message: error.message });
+
     }
+    //     const existe = await desaparecidoModel.desaparecidoExistente(req.body.id_tipo_documento, req.body.documento_desaparecido, req.body.nombre_desaparecido);
+    //     if(existe.existe){
+    //         return res.status(400).json({ message: "" });
+            
+    //     }
+    //     else{
+    //         const desaparecido = await desaparecidoModel.crearDesaparecido(req.body);
+    //         if(!desaparecido.success){
+    //             return res.status(400).json({ message: "Error al crear la publicación"});
+                
+    //         }
+    //         return res.status(200).json({ message: "Desaparecido creado exitosamente" });
+    //     }
+    // } catch (error) {
+    //     console.log(error);
+    //     return res.status(500).json({ message: error.message });
+        
+    // }
 }
 
 // Get desaparecido by id
