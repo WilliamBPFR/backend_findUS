@@ -1,13 +1,18 @@
 const {supabaseAnon} = require('../services/supabaseService');
+import { decode } from 'base64-arraybuffer';
 
-
-const uploadPhoto = async (file) => {
+const uploadPhoto = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = 'Fotos desaparecidos/' + file.name;
-        const {data, error} = await supabaseAnon
+        const filePath = 'Fotos desaparecidos/' + fileName;
+
+        // Convertir base64 a ArrayBuffer usando 'base64-arraybuffer'
+        const fileData = decode(fileBase64);
+
+        const { data, error } = await supabaseAnon
             .storage
             .from('assets')
-            .upload(filePath, file, {
+            .upload(filePath, fileData, {
+                contentType: mimeType,
                 cacheControl: '3600',
                 upsert: false,
             });
@@ -16,10 +21,12 @@ const uploadPhoto = async (file) => {
             return { success: false, error };
         }
 
-        // obtener la URL de la imagen subida
-        const {url, error: urlError} = supabaseAnon.storage
+        // Obtener la URL de la imagen subida
+        const { url, error: urlError } = supabaseAnon
+            .storage
             .from('assets')
             .getPublicUrl(filePath);
+
         if (urlError) {
             return { success: false, error: urlError };
         }
@@ -28,15 +35,20 @@ const uploadPhoto = async (file) => {
         console.error('Error al subir la foto:', error.message);
         return { success: false, message: error.message };
     }
-}
+};
 
-const uploadfile = async (file) => {
+const uploadFile = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = 'Reportes policía/' + file.name;
-        const {data, error} = await supabaseAnon
+        const filePath = 'Reportes policía/' + fileName;
+
+        // Convertir base64 a ArrayBuffer
+        const fileData = decode(fileBase64);
+
+        const { data, error } = await supabaseAnon
             .storage
             .from('assets')
-            .upload(filePath, file, {
+            .upload(filePath, fileData, {
+                contentType: mimeType,
                 cacheControl: '3600',
                 upsert: false,
             });
@@ -45,8 +57,9 @@ const uploadfile = async (file) => {
             return { success: false, error };
         }
 
-        // obtener la URL de la documento subida
-        const {url, error: urlError} = supabaseAnon.storage
+        // Obtener la URL del archivo subido
+        const { url, error: urlError } = supabaseAnon
+            .storage
             .from('assets')
             .getPublicUrl(filePath);
 
@@ -58,6 +71,9 @@ const uploadfile = async (file) => {
         console.error('Error al subir el reporte de policía:', error.message);
         return { success: false, message: error.message };
     }
-}
+};
 
-module.exports = { uploadPhoto, uploadfile };
+module.exports = {
+    uploadPhoto,
+    uploadFile,
+};
