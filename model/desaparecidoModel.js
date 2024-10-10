@@ -31,7 +31,7 @@ const crearDesaparecido = async (desaparecido_data) => {
                 fechacreacion: new Date(), // Generar la fecha actual
             }
         });
-        return { success: true, desaparecido };
+        return { success: true, id: desaparecido.id };
     } catch (error) {
         console.error('Error al crear el desaparecido:', error);
         return { success: false, error };

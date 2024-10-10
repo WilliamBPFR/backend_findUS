@@ -84,7 +84,7 @@ model fotosavistamiento {
 
 model fotospublicacion {
   id                    Int                  @id @default(autoincrement())
-  urlarchivo            String?              @db.VarChar(255)
+  urlarchivo            String?
   idtipofotopublicacion Int?
   idpublicacion         Int?
   fechacreacion         DateTime?            @default(now()) @db.Timestamp(6)
