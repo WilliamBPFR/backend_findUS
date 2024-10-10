@@ -34,7 +34,7 @@ const createDesaparecido = async (req, res) => {
                 return res.status(400).json({ message: "Error al crear la publicación"});
                 
             }
-            return res.status(200).json({ message: "Desaparecido creado exitosamente" });
+            return res.status(200).json({ message: "Desaparecido creado exitosamente", idpublicacion: desaparecido.id});
 
     } catch (error) { 
         return res.status(500).json({ message: error.message });

@@ -4,11 +4,9 @@ const { uploadPhoto, uploadFile } = require('../services/uploadFiles');
 
 const crearFotoPublicacion = async (foto_data) => {
     try {
-        let urlarchivo = null;
-
         // Si el usuario ha proporcionado una imagen, sube la imagen
         if (foto_data.base64Image) {
-            const { url, success, error } = await uploadPhoto(
+            const { signedUrl, success, error } = await uploadPhoto(
                 foto_data.base64Image,
                 foto_data.fileName,
                 foto_data.mimeType
@@ -16,12 +14,23 @@ const crearFotoPublicacion = async (foto_data) => {
             if (!success) {
                 throw new Error(`Error subiendo la imagen: ${error.message}`);
             }
-            urlarchivo = url; // Guardamos la URL de la imagen
+
+            // Creando el registro en la tabla fotospublicacion con la URL de la imagen
+            const nuevaFotoPublicacion = await prisma.fotospublicacion.create({
+                data: {
+                    urlarchivo: signedUrl, // Usamos la URL generada (firmada)
+                    idtipofotopublicacion: 1,
+                    idpublicacion: foto_data.idpublicacion || null,
+                    fechacreacion: new Date(),
+                },
+            });
+
+            console.log('Foto subida:', nuevaFotoPublicacion);
         }
 
         // Si el usuario ha proporcionado un archivo, sube el archivo
         if (foto_data.base64File) {
-            const { url, success, error } = await uploadFile(
+            const { signedUrl, success, error } = await uploadFile(
                 foto_data.base64File,
                 foto_data.fileName,
                 foto_data.mimeType
@@ -29,22 +38,23 @@ const crearFotoPublicacion = async (foto_data) => {
             if (!success) {
                 throw new Error(`Error subiendo el archivo: ${error.message}`);
             }
-            urlarchivo = url; // Guardamos la URL del archivo
-        }
 
-        // Creando el registro en la tabla fotospublicacion
-        const nuevaFotoPublicacion = await prisma.fotospublicacion.create({
-            data: {
-                urlarchivo, // Usamos la URL generada
-                idtipofotopublicacion: foto_data.idtipofotopublicacion || null,
-                idpublicacion: foto_data.idpublicacion || null,
-                fechacreacion: new Date(),
-            },
-        });
+            // Creando el registro en la tabla fotospublicacion con la URL del archivo
+            const nuevaFotoPublicacion = await prisma.fotospublicacion.create({
+                data: {
+                    urlarchivo: signedUrl, // Usamos la URL generada (firmada)
+                    idtipofotopublicacion: 2,
+                    idpublicacion: foto_data.idpublicacion || null,
+                    fechacreacion: new Date(),
+                },
+            });
+
+            console.log('Archivo subido:', nuevaFotoPublicacion);
+        }
 
         return {
             success: true,
-            data: nuevaFotoPublicacion,
+            message: 'Foto y/o archivo subido(s) correctamente.',
         };
     } catch (error) {
         console.error('Error creando foto publicacion:', error.message);

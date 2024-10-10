@@ -1,13 +1,18 @@
-const {supabaseAnon} = require('../services/supabaseService');
-import { decode } from 'base64-arraybuffer';
+const { supabaseAnon } = require('../services/supabaseService');
+const { decode } = require('base64-arraybuffer');
 
+// Tiempo en segundos para 1 año (365 días)
+const oneYearInSeconds = 365 * 24 * 60 * 60; // 31,536,000 segundos
+
+// Servicio para subir fotos
 const uploadPhoto = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = 'Fotos desaparecidos/' + fileName;
+        const filePath = 'Fotos desaparecidos/' + new Date().getTime() + fileName
 
         // Convertir base64 a ArrayBuffer usando 'base64-arraybuffer'
         const fileData = decode(fileBase64);
 
+        // Subir la imagen al bucket
         const { data, error } = await supabaseAnon
             .storage
             .from('assets')
@@ -18,32 +23,45 @@ const uploadPhoto = async (fileBase64, fileName, mimeType) => {
             });
 
         if (error) {
+            console.log('Error subiendo la imagen al bucket:', error);
             return { success: false, error };
         }
+        else{
+            console.log('Imagen subida al bucket:', data);
+        }
 
-        // Obtener la URL de la imagen subida
-        const { url, error: urlError } = supabaseAnon
+        // Generar la URL firmada válida por 1 año
+        const { data: signedUrlData, error: signedUrlError } = await supabaseAnon
             .storage
             .from('assets')
-            .getPublicUrl(filePath);
+            .createSignedUrl(filePath, oneYearInSeconds);
 
-        if (urlError) {
-            return { success: false, error: urlError };
+        if (signedUrlError) {
+            console.log('Error generando URL firmada:', signedUrlError);
+            return { success: false, error: signedUrlError };
         }
-        return { url, success: true };
+        else{
+            console.log('URL firmada generada:', signedUrlData);
+        }
+
+        // Devolver la URL firmada
+        const signedUrl = signedUrlData.signedUrl;
+        return { signedUrl, success: true };
     } catch (error) {
         console.error('Error al subir la foto:', error.message);
         return { success: false, message: error.message };
     }
 };
 
+// Servicio para subir archivos
 const uploadFile = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = 'Reportes policía/' + fileName;
+        const filePath = 'Reportes policia/' + new Date().getTime() + fileName ;
 
         // Convertir base64 a ArrayBuffer
         const fileData = decode(fileBase64);
 
+        // Subir el archivo al bucket
         const { data, error } = await supabaseAnon
             .storage
             .from('assets')
@@ -56,17 +74,26 @@ const uploadFile = async (fileBase64, fileName, mimeType) => {
         if (error) {
             return { success: false, error };
         }
+        else{
+            console.log('Archivo subido al bucket:', data);
+        }
 
-        // Obtener la URL del archivo subido
-        const { url, error: urlError } = supabaseAnon
+        // Generar la URL firmada válida por 1 año
+        const { data: signedUrlData, error: signedUrlError } = await supabaseAnon
             .storage
             .from('assets')
-            .getPublicUrl(filePath);
+            .createSignedUrl(filePath, oneYearInSeconds);
 
-        if (urlError) {
-            return { success: false, error: urlError };
+        if (signedUrlError) {
+            return { success: false, error: signedUrlError };
         }
-        return { url, success: true };
+        else{
+            console.log('URL firmada generada:', signedUrlData);
+        }
+
+        // Devolver la URL firmada
+        const signedUrl = signedUrlData.signedUrl;
+        return { signedUrl, success: true };
     } catch (error) {
         console.error('Error al subir el reporte de policía:', error.message);
         return { success: false, message: error.message };
