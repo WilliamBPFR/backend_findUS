@@ -44,7 +44,7 @@ const crearUsuario = async (user_data) => {
 const getUserById = async (id) => {
     const user = await prisma.usuario.findFirst({
         where: {
-            id: id
+            id: parseInt(id)
         }
     });
     return user;
@@ -137,12 +137,27 @@ const solicitarCambiorContrasenaUsuario = async (email,isresend = false) => {
             }
         });
 
-        if(cambioContrasena){
+
+        if(cambioContrasena && cambioContrasena.fechaexpiracioncodigo > new Date()){
             return {message: "Códiga ya había sido enviado y está vigente. Verifique su correo e introdúzcalo a continuación", verificado: true};
         }
+
+        if(cambioContrasena && cambioContrasena.fechaexpiracioncodigo < new Date()){
+            await prisma.cambiarcontrasena.update({
+                where: {
+                    id: cambioContrasena.id
+                },
+                data: {
+                    vigente: false,
+                    idestatus: 2,
+                    idEstado: 3
+                }
+            })
+        }
+        
     }
 
-    const {data,error} = await supabaseAnon.auth.resetPasswordForEmail(email);
+    const {data,error} = await supabaseAnon.auth.resetPasswordForEmail(email,{redirectTo: "http://localhost:3000/nuevaContrasena"});
     if(error){
         console.error('Error en la verificación del correo:', error);
         return { verificado: false, message: error.code };
