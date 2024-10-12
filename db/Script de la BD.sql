@@ -163,6 +163,7 @@ CREATE TABLE IdiomaAplicacion(
 -- Insertar datos en las tablas de catálogo
 INSERT INTO Estado (nombreEstado, tipoEstado) VALUES ('Activo', 'General');
 INSERT INTO Estado (nombreEstado, tipoEstado) VALUES ('Inactivo', 'General');
+INSERT INTO Estado (nombreEstado, tipoEstado) VALUES ('Vencido', 'Cambio de Contraseña');
 
 INSERT INTO TipoFotoPublicacion (nombreTipoFotoPublicacion) VALUES ('Foto Desaparecido');
 INSERT INTO TipoFotoPublicacion (nombreTipoFotoPublicacion) VALUES ('Foto Reporte Policial');
