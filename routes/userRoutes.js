@@ -3,6 +3,11 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const {authenticate} = require('../routes/routeAutenthicationService');
 
+// Rutas protegidas
+router.post('/user/cambiar_contrasena', authenticate, userController.cambiar_contrasena);
+router.get("/user/verificar_token_valido/", authenticate, userController.verificar_token_valido);
+
+// Rutas públicas
 router.get('/user/:id', userController.getUserById);
 router.get('/user', userController.getAllUser);
 router.post('/user/registrar_usuario', userController.registrar_usuario);
@@ -13,6 +18,4 @@ router.put('/user/cambiar_rol', userController.modificar_rol_Usuario);
 router.post('/user/solicitar_cambio_contrasena', userController.solicitar_cambio_contrasena);
 router.post('/user/verificar_codigo_cambio_contrasena',userController.verificar_codigo_cambio_contrasena);
 
-// Rutas protegidas
-router.post('/user/cambiar_contrasena', authenticate, userController.cambiar_contrasena);
 module.exports = router;
