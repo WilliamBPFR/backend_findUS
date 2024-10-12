@@ -29,7 +29,7 @@ const createDesaparecido = async (req, res) => {
 
     */
     try {
-        const desaparecido = await desaparecidoModel.crearDesaparecido(req.body);
+        const desaparecido = await desaparecidoModel.crearDesaparecido(req.body,req.user.id_user);
             if(!desaparecido.success){
                 return res.status(400).json({ message: "Error al crear la publicación"});
                 
