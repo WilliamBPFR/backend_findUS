@@ -229,6 +229,22 @@ const modificar_usuario = async (req, res) => {
     }
 }
 
+const verificar_token_valido = async (req, res) => {
+    /* #swagger.tags = ['User']
+        #swagger.security = [{
+            "authorization": []
+        }] 
+       #swagger.description = 'Endpoint para verificar si el token es válido.'
+    */
+    try {
+        console.log("TOKEN VALIDO");
+        console.log(req.user.id);
+        return res.status(200).json({ message: "Token válido" });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 const modificar_rol_Usuario = async (req, res) => {
     /* #swagger.tags = ['User']
        #swagger.description = 'Endpoint para modificar el rol de un usuario.'
@@ -260,5 +276,6 @@ module.exports = {
     verificar_codigo_cambio_contrasena,
     cambiar_contrasena,
     getAllUser,
-    getUserById
+    getUserById,
+    verificar_token_valido
 };
