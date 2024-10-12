@@ -3,12 +3,13 @@ const prisma = new PrismaClient();
 const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
 
 // Crear un nuevo desaparecido
-const crearDesaparecido = async (desaparecido_data) => {
+const crearDesaparecido = async (desaparecido_data,user_id) => {
+    console.log(desaparecido_data)
     try{
         const desaparecido = await prisma.publicacion.create({
             data: {
                 usuario: {
-                    connect: { id: desaparecido_data.idusuario } // Conectar con el usuario usando su ID
+                    connect: { id: parseInt(user_id) } // Conectar con el usuario usando su ID
                 },
                 nombredesaparecido: desaparecido_data.nombre_desaparecido,
                 tipodocumento: {
