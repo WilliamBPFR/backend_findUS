@@ -104,10 +104,24 @@ const deleteDesaparecido = async (req, res) => {
     }
 };
 
+const getDesaparecidosActivos = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    const page = parseInt(req.params.page, 10) || 1; // Si no hay página, usa 1 por defecto
+    const limit = parseInt(req.params.limit, 10) || 10; // Si no hay limit, usa 10 por defecto
+    try {
+        const desaparecidos = await desaparecidoModel.getAllDesaparecidosActivos(page,limit);
+        res.status(200).json(desaparecidos);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     createDesaparecido,
     getDesaparecido,
     getAllDesaparecidos,
     updateDesaparecido,
-    deleteDesaparecido
+    deleteDesaparecido,
+    getDesaparecidosActivos
 };
