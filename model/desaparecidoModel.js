@@ -69,6 +69,44 @@ const getAllDesaparecidos = async () => {
     return await prisma.publicacion.findMany();
 }
 
+const getAllDesaparecidosActivos = async (page=1,limit=10) => {
+    const skip = (page - 1) * limit; // Cálculo de los registros a omitir
+    return await prisma.publicacion.findMany({
+        where: {
+            estado: {
+                id: 1
+            }
+        },
+        select:{
+            fechacreacion: true,
+            nombredesaparecido: true,
+            descripcionpersonadesaparecido: true,
+            fechadesaparicion: true,
+            usuario: {
+                select:{
+                    nombre: true,
+                    apellido: true,
+                    urlfotoperfil: true
+                }
+            },
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                }
+            }
+        },
+        orderBy:{
+            fechacreacion: 'desc'
+        },
+        skip: skip,
+        take: limit
+    });
+
+
+}
+
+
 // Actualizar un desaparecido por ID
 const updateDesaparecido = async (id, data) => {
     return await prisma.publicacion.update({
@@ -96,4 +134,5 @@ module.exports = {
     getAllDesaparecidos,
     updateDesaparecido,
     deleteDesaparecido,
+    getAllDesaparecidosActivos
 };
