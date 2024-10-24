@@ -6,6 +6,7 @@ const {authenticate} = require('../routes/routeAutenthicationService');
 // Rutas protegidas
 router.post('/user/cambiar_contrasena', authenticate, userController.cambiar_contrasena);
 router.get("/user/verificar_token_valido/", authenticate, userController.verificar_token_valido);
+router.get("/user/obtener_foto_perfil_usuario", authenticate, userController.getUserProfilePicture);
 
 // Rutas públicas
 router.get('/user/:id', userController.getUserById);

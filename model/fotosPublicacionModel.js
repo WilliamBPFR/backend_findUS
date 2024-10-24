@@ -8,7 +8,7 @@ const tiposFotos = ["jpg","jpeg","png"]
 const crearFotoPublicacion = async (foto_data) => {
     
     try {
-        const extensionFile = foto_data.fileName.split('.')[1];
+        // const extensionFile = foto_data.fileName.split('.')[1];
         // Si el usuario ha proporcionado una imagen, sube la imagen
         if (foto_data.base64Image) {
             const { signedUrl, success, error } = await uploadPhoto(

@@ -290,6 +290,15 @@ const cambiarRolUsuario = async (email, idRol) => {
     return user;
 }
 
+const getUserProfilePicture = async (id) => {
+    const user = await prisma.usuario.findFirst({
+        where: {
+            id: id
+        }
+    });
+    return user.urlfotoperfil;
+}
+
 
 module.exports = {
     crearUsuario,
@@ -303,4 +312,5 @@ module.exports = {
     verificarUsuario,
     getUserById,
     getAllUser,
+    getUserProfilePicture
 };
