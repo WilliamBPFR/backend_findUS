@@ -22,8 +22,8 @@ const crearDesaparecido = async (desaparecido_data,user_id) => {
                 descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
                 relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
                 informacioncontacto: desaparecido_data.contacto,
-                ubicaci_n_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
-                ubicaci_n_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                ubicacion_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
+                ubicacion_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
                 verificado: false,
                 fechanacimiento: desaparecido_data.fecha_nacimiento,
                 estado: {
@@ -158,6 +158,50 @@ const getDesaparecidosActivosScrollHorizontal = async () => {
 
 }
 
+const getInfoDesaparecidoByID = async (id) => {
+    const publicacion = await prisma.publicacion.findUnique({
+        where: {
+            id: parseInt(id)
+        },
+        include:{
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                }
+            },
+            avistamiento:{
+                include:{
+                    fotosavistamiento: {
+                        select:{
+                            urlarchivo: true,
+                        }
+                    },
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    }
+                }
+            },
+            comentario:{
+                include:{
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+    return publicacion;
+
+}
 
 
 // Actualizar un desaparecido por ID
@@ -188,5 +232,6 @@ module.exports = {
     updateDesaparecido,
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
-    getDesaparecidosActivosScrollHorizontal
+    getDesaparecidosActivosScrollHorizontal,
+    getInfoDesaparecidoByID
 };

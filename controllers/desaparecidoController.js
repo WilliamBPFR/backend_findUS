@@ -130,6 +130,17 @@ const getDesaparecidosActivosScrollHorizontal = async (req, res) => {
     }
 }
 
+const getInfoDesaparecidoByID = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        const desaparecido = await desaparecidoModel.getInfoDesaparecidoByID(req.params.id);
+        res.status(200).json(desaparecido);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     createDesaparecido,
     getDesaparecido,
@@ -137,5 +148,6 @@ module.exports = {
     updateDesaparecido,
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
-    getDesaparecidosActivosScrollHorizontal
+    getDesaparecidosActivosScrollHorizontal,
+    getInfoDesaparecidoByID
 };

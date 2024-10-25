@@ -110,8 +110,8 @@ model publicacion {
   descripcionpersonadesaparecido  String?            @db.VarChar(255)
   relacionusuariocondesaparecido  String?            @db.VarChar(255)
   informacioncontacto             String?            @db.VarChar(255)
-  ubicaci_n_desaparicion_latitud  String?            @map("ubicación_desaparicion_latitud") @db.VarChar(255)
-  ubicaci_n_desaparicion_longitud String?            @map("ubicación_desaparicion_longitud") @db.VarChar(255)
+  ubicacion_desaparicion_latitud  String?            @db.VarChar(255)
+  ubicacion_desaparicion_longitud String?            @db.VarChar(255)
   verificado                      Boolean?
   idestado                        Int?
   fechacreacion                   DateTime?          @default(now()) @db.Timestamp(6)
@@ -132,7 +132,7 @@ model recursoeducativo {
   nombre              String?            @db.VarChar(255)
   descripcion         String?            @db.VarChar(255)
   idestado            Int?
-  urlmaterial         String?            @db.VarChar(255)
+  urlmaterial         String?
   fechacreacion       DateTime?          @default(now()) @db.Timestamp(6)
   categoriamaterial   categoriamaterial? @relation(fields: [idcategoriamaterial], references: [id], onDelete: NoAction, onUpdate: NoAction)
   estado              estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
