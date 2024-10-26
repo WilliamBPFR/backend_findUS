@@ -69,8 +69,20 @@ const getAllDesaparecidos = async () => {
     return await prisma.publicacion.findMany();
 }
 
-const getAllDesaparecidosActivos = async (page=1,limit=10) => {
-    const skip = (page - 1) * limit; // Cálculo de los registros a omitir
+const getCantidadDesaparecidosActivos = async () => {
+    return await prisma.publicacion.count({
+        where: {
+            estado: {
+                id: 1
+            }
+        }
+    });
+}
+
+const getDesaparecidosActivosScrollGrande = async (page=1,limit=10) => {
+    const cantPublicaciones = page == 1 ? await getCantidadDesaparecidosActivos() : 0;
+    const publicacionesASaltarIniciales = (cantPublicaciones > 5 && page == 1) ? 5 : cantPublicaciones;
+    const skip = page == 1 ? ((page - 1) * limit + publicacionesASaltarIniciales) : (page - 1) * limit; // Cálculo de los registros a omitir
     return await prisma.publicacion.findMany({
         where: {
             estado: {
@@ -78,6 +90,7 @@ const getAllDesaparecidosActivos = async (page=1,limit=10) => {
             }
         },
         select:{
+            id: true,
             fechacreacion: true,
             nombredesaparecido: true,
             descripcionpersonadesaparecido: true,
@@ -93,6 +106,9 @@ const getAllDesaparecidosActivos = async (page=1,limit=10) => {
                 select:{
                     urlarchivo: true,
                     idtipofotopublicacion: true
+                },
+                where:{
+                    idtipofotopublicacion: 1
                 }
             }
         },
@@ -105,6 +121,43 @@ const getAllDesaparecidosActivos = async (page=1,limit=10) => {
 
 
 }
+
+const getDesaparecidosActivosScrollHorizontal = async () => {
+    const cantPublicaciones = await getCantidadDesaparecidosActivos();
+    console.log("Cantidad de publicaciones activas: ");
+    console.log(cantPublicaciones);
+    const limite = cantPublicaciones > 5 ? 5 : cantPublicaciones;
+    return await prisma.publicacion.findMany({
+        where: {
+            estado: {
+                id: 1
+            }
+        },
+        select:{
+            id: true,
+            nombredesaparecido: true,
+            fechadesaparicion: true,
+            fechanacimiento: true,
+            numerodocumentodesaparecido: true,
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+                where:{
+                    idtipofotopublicacion: 1
+                }
+            }
+        },
+        orderBy:{
+            fechacreacion: 'desc'
+        },
+        take: limite
+    });
+
+
+}
+
 
 
 // Actualizar un desaparecido por ID
@@ -134,5 +187,6 @@ module.exports = {
     getAllDesaparecidos,
     updateDesaparecido,
     deleteDesaparecido,
-    getAllDesaparecidosActivos
+    getDesaparecidosActivosScrollGrande,
+    getDesaparecidosActivosScrollHorizontal
 };

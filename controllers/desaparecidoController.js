@@ -104,12 +104,13 @@ const deleteDesaparecido = async (req, res) => {
     }
 };
 
-const getDesaparecidosActivos = async (req, res) => {
+const getDesaparecidosActivosScrollGrande = async (req, res) => {
     // #swagger.tags = ['Desaparecido']
+    console.log("entro a getDesaparecidosActivosScrollGrande");
     const page = parseInt(req.params.page, 10) || 1; // Si no hay página, usa 1 por defecto
     const limit = parseInt(req.params.limit, 10) || 10; // Si no hay limit, usa 10 por defecto
     try {
-        const desaparecidos = await desaparecidoModel.getAllDesaparecidosActivos(page,limit);
+        const desaparecidos = await desaparecidoModel.getDesaparecidosActivosScrollGrande(page,limit);
         res.status(200).json(desaparecidos);
     } catch (error) {
         console.log(error);
@@ -117,11 +118,24 @@ const getDesaparecidosActivos = async (req, res) => {
     }
 };
 
+const getDesaparecidosActivosScrollHorizontal = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    console.log("entro a getDesaparecidosActivosScrollHorizontal");
+    try {
+        const desaparecidos = await desaparecidoModel.getDesaparecidosActivosScrollHorizontal();
+        res.status(200).json(desaparecidos);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     createDesaparecido,
     getDesaparecido,
     getAllDesaparecidos,
     updateDesaparecido,
     deleteDesaparecido,
-    getDesaparecidosActivos
+    getDesaparecidosActivosScrollGrande,
+    getDesaparecidosActivosScrollHorizontal
 };
