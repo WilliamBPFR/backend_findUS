@@ -4,10 +4,29 @@ const { decode } = require('base64-arraybuffer');
 // Tiempo en segundos para 1 año (365 días)
 const oneYearInSeconds = 365 * 24 * 60 * 60; // 31,536,000 segundos
 
+// Mapa de caracteres a reemplazar
+const replaceMap = {
+    'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+    'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+    'ñ': 'n', 'Ñ': 'N',
+    // Puedes agregar más caracteres según sea necesario
+};
+
+// Función para sanear el nombre del archivo
+const sanitizeFileName = (fileName) => {
+    // Reemplaza caracteres acentuados
+    let sanitized = fileName.replace(/[áéíóúÁÉÍÓÚñÑ]/g, (match) => replaceMap[match]);
+    // Reemplaza caracteres no permitidos
+    sanitized = sanitized.replace(/[\/\\\?*\:<>"|]/g, "_"); // Reemplaza caracteres no permitidos
+    return sanitized;
+};
+
 // Servicio para subir fotos
 const uploadPhoto = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = 'Fotos desaparecidos/' + new Date().getTime() + fileName
+        // Sanear el nombre del archivo
+        fileName = sanitizeFileName(fileName);
+        const filePath = 'Fotos desaparecidos/' + fileName
 
         // Convertir base64 a ArrayBuffer usando 'base64-arraybuffer'
         const fileData = decode(fileBase64);
@@ -56,7 +75,9 @@ const uploadPhoto = async (fileBase64, fileName, mimeType) => {
 // Servicio para subir archivos
 const uploadFile = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = 'Reportes policia/' + new Date().getTime() + fileName ;
+        // Sanear el nombre del archivo
+        fileName = sanitizeFileName(fileName);
+        const filePath = 'Reportes policia/' + fileName ;
 
         // Convertir base64 a ArrayBuffer
         const fileData = decode(fileBase64);
@@ -72,6 +93,7 @@ const uploadFile = async (fileBase64, fileName, mimeType) => {
             });
 
         if (error) {
+            console.log('Error subiendo el archivo al bucket:', error);
             return { success: false, error };
         }
         else{
