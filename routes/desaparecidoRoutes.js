@@ -14,5 +14,7 @@ router.put('/desaparecido/updateDesaparecido/:id', desaparecidoController.update
 router.delete('/desaparecido/deleteDesaparecido/:id', desaparecidoController.deleteDesaparecido);
 router.get('/desaparecido/obtenerDesaparecidosActivosScrollGrande/:page/:limit', desaparecidoController.getDesaparecidosActivosScrollGrande);
 router.get('/desaparecido/obtenerDesaparecidosActivosScrollHorizontal', desaparecidoController.getDesaparecidosActivosScrollHorizontal);
+router.get('/desaparecido/obtenerInfoDesaparecidoByID/:id', desaparecidoController.getInfoDesaparecidoByID);
+router.post('/desaparecido/pruebaLocalidad', desaparecidoController.pruebaLocalidad);
 
 module.exports = router;
