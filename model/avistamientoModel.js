@@ -1,23 +1,63 @@
 const {PrismaClient} = require('@prisma/client')
+const { uploadFile } = require('../services/uploadFiles');
+const { getLocalidadUbicacion } = require('../services/ubicacion');
 
 const prisma = new PrismaClient()
 
-const crearAvistamiento = async (avistamiento_data) => {
+const crearAvistamiento = async (avistamiento_data,id_usuario) => {
+    const localidadAvistamiento = await getLocalidadUbicacion(avistamiento_data.ubicacion_latitud, avistamiento_data.ubicacion_longitud);
     const avistamiento = await prisma.avistamiento.create({
         data: {
-            idUsuario: avistamiento_data.idUsuario,
-            idPublicacion: avistamiento_data.idPublicacion,
-            ubicacion: avistamiento_data.ubicacion,
-            fechaHora: new Date(avistamiento_data.fechaAvistamiento),
+            idusuario: id_usuario,
+            idpublicacion: parseInt(avistamiento_data.idPublicacion),
+            ubicacion_desaparicion_latitud: avistamiento_data.ubicacion_latitud,
+            ubicacion_desaparicion_longitud: avistamiento_data.ubicacion_longitud,
+            fechahora: new Date(avistamiento_data.fecha_avistamiento),
             detalles: avistamiento_data.detalles,
-            Verificado: avistamiento_data.Verificado,
-            IdEstatus: avistamiento_data.IdEstatus,
-            fechaCreacion: new Date(avistamiento_data.fechaCreacion),
-            fotosavistamiento: avistamiento_data.fotosavistamiento,
+            localidad_avistamiento: localidadAvistamiento,
+            verificado: false,
+            idestatus: 1,
+            fechacreacion: new Date(),
 
         }
     });
     return avistamiento;
+}
+
+const crearFotoAvistamiento = async (foto_data) => {
+    try{
+        const { signedUrl, success, error } = await uploadFile(
+            foto_data.base64File,
+            foto_data.fileName,
+            foto_data.mimeType,
+            "Fotos Avistamientos"
+        );
+        if (!success) {
+            throw new Error(`Error subiendo la imagen: ${error.message}`);
+        }
+
+        // Creando el registro en la tabla fotospublicacion con la URL de la imagen
+        const nuevaFotoAvistamiento = await prisma.fotosavistamiento.create({
+            data: {
+                urlarchivo: signedUrl, // Usamos la URL generada (firmada)
+                idavistamiento: foto_data.idavistamiento || null,
+                fechacreacion: new Date(),
+            },
+        });
+
+        console.log('Foto subida:', nuevaFotoAvistamiento);
+        return {
+            success: true,
+            message: 'Foto y/o archivo subido(s) correctamente.',
+        };
+        
+    } catch (error) {
+        console.error('Error creando foto publicacion:', error.message);
+        return {
+            success: false,
+            message: error.message,
+        };
+    }
 }
 
 const avistamientoExistente = async (idUsuario, idPublicacion) => {
@@ -81,4 +121,5 @@ module.exports = {
     getAllAvistamientos,
     updateAvistamiento,
     deleteAvistamiento,
+    crearFotoAvistamiento
 };

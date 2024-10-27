@@ -2,8 +2,13 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const { uploadPhoto, uploadFile } = require('../services/uploadFiles');
 
+
+//Araay con todos los tipos de fotos
+const tiposFotos = ["jpg","jpeg","png"]
 const crearFotoPublicacion = async (foto_data) => {
+    
     try {
+        // const extensionFile = foto_data.fileName.split('.')[1];
         // Si el usuario ha proporcionado una imagen, sube la imagen
         if (foto_data.base64Image) {
             const { signedUrl, success, error } = await uploadPhoto(
@@ -30,10 +35,12 @@ const crearFotoPublicacion = async (foto_data) => {
 
         // Si el usuario ha proporcionado un archivo, sube el archivo
         if (foto_data.base64File) {
+            
             const { signedUrl, success, error } = await uploadFile(
                 foto_data.base64File,
                 foto_data.fileName,
-                foto_data.mimeType
+                foto_data.mimeType,
+                "Reportes policia"
             );
             if (!success) {
                 throw new Error(`Error subiendo el archivo: ${error.message}`);

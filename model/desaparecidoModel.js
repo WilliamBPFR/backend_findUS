@@ -1,9 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
+const {getLocalidadUbicacion} = require('../services/ubicacion');
 
 // Crear un nuevo desaparecido
 const crearDesaparecido = async (desaparecido_data,user_id) => {
+    const localidad = await getLocalidadUbicacion(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud);
     console.log(desaparecido_data)
     try{
         const desaparecido = await prisma.publicacion.create({
@@ -22,8 +24,9 @@ const crearDesaparecido = async (desaparecido_data,user_id) => {
                 descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
                 relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
                 informacioncontacto: desaparecido_data.contacto,
-                ubicaci_n_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
-                ubicaci_n_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                ubicacion_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
+                ubicacion_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                localidad_desaparicion: localidad,
                 verificado: false,
                 fechanacimiento: desaparecido_data.fecha_nacimiento,
                 estado: {
@@ -69,6 +72,150 @@ const getAllDesaparecidos = async () => {
     return await prisma.publicacion.findMany();
 }
 
+const getCantidadDesaparecidosActivos = async () => {
+    return await prisma.publicacion.count({
+        where: {
+            estado: {
+                id: 1
+            }
+        }
+    });
+}
+
+const getDesaparecidosActivosScrollGrande = async (page=1,limit=10) => {
+    const cantPublicaciones = page == 1 ? await getCantidadDesaparecidosActivos() : 0;
+    const publicacionesASaltarIniciales = (cantPublicaciones > 5 && page == 1) ? 5 : cantPublicaciones;
+    const skip = page == 1 ? ((page - 1) * limit + publicacionesASaltarIniciales) : (page - 1) * limit; // Cálculo de los registros a omitir
+    return await prisma.publicacion.findMany({
+        where: {
+            estado: {
+                id: 1
+            }
+        },
+        select:{
+            id: true,
+            fechacreacion: true,
+            nombredesaparecido: true,
+            descripcionpersonadesaparecido: true,
+            fechadesaparicion: true,
+            usuario: {
+                select:{
+                    nombre: true,
+                    apellido: true,
+                    urlfotoperfil: true
+                }
+            },
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+                where:{
+                    idtipofotopublicacion: 1
+                }
+            }
+        },
+        orderBy:{
+            fechacreacion: 'desc'
+        },
+        skip: skip,
+        take: limit
+    });
+
+
+}
+
+const getDesaparecidosActivosScrollHorizontal = async () => {
+    const cantPublicaciones = await getCantidadDesaparecidosActivos();
+    console.log("Cantidad de publicaciones activas: ");
+    console.log(cantPublicaciones);
+    const limite = cantPublicaciones > 5 ? 5 : cantPublicaciones;
+    return await prisma.publicacion.findMany({
+        where: {
+            estado: {
+                id: 1
+            }
+        },
+        select:{
+            id: true,
+            nombredesaparecido: true,
+            fechadesaparicion: true,
+            fechanacimiento: true,
+            numerodocumentodesaparecido: true,
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+                where:{
+                    idtipofotopublicacion: 1
+                }
+            }
+        },
+        orderBy:{
+            fechacreacion: 'desc'
+        },
+        take: limite
+    });
+
+
+}
+
+const getInfoDesaparecidoByID = async (id) => {
+    const publicacion = await prisma.publicacion.findUnique({
+        where: {
+            id: parseInt(id)
+        },
+        include:{
+            tipodocumento: true,
+            estado: true,
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+                where:{
+                    idtipofotopublicacion: 1
+                },
+            },
+            avistamiento:{
+                include:{
+                    fotosavistamiento: {
+                        select:{
+                            urlarchivo: true,
+                        }
+                    },
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    }
+                },
+                orderBy:{
+                    id: 'desc'
+                }
+                    
+            },
+            comentario:{
+                include:{
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+    return publicacion;
+
+}
+
+
 // Actualizar un desaparecido por ID
 const updateDesaparecido = async (id, data) => {
     return await prisma.publicacion.update({
@@ -96,4 +243,7 @@ module.exports = {
     getAllDesaparecidos,
     updateDesaparecido,
     deleteDesaparecido,
+    getDesaparecidosActivosScrollGrande,
+    getDesaparecidosActivosScrollHorizontal,
+    getInfoDesaparecidoByID
 };

@@ -5,9 +5,9 @@ const { decode } = require('base64-arraybuffer');
 const oneYearInSeconds = 365 * 24 * 60 * 60; // 31,536,000 segundos
 
 // Servicio para subir fotos
-const uploadPhoto = async (fileBase64, fileName, mimeType,carpeta) => {
+const uploadPhoto = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = 'Fotos desaparecidos/' + new Date().getTime() + fileName
+        const filePath = 'Material Educativo/' + new Date().getTime() + fileName
 
         // Convertir base64 a ArrayBuffer usando 'base64-arraybuffer'
         const fileData = decode(fileBase64);
@@ -54,9 +54,9 @@ const uploadPhoto = async (fileBase64, fileName, mimeType,carpeta) => {
 };
 
 // Servicio para subir archivos
-const uploadFile = async (fileBase64, fileName, mimeType,carpeta) => {
+const uploadFile = async (fileBase64, fileName, mimeType) => {
     try {
-        const filePath = `${carpeta}/` + new Date().getTime() + fileName ;
+        const filePath = 'Material Educativo/' + new Date().getTime() + fileName ;
 
         // Convertir base64 a ArrayBuffer
         const fileData = decode(fileBase64);
@@ -95,7 +95,7 @@ const uploadFile = async (fileBase64, fileName, mimeType,carpeta) => {
         const signedUrl = signedUrlData.signedUrl;
         return { signedUrl, success: true };
     } catch (error) {
-        console.error('Error al subir el reporte de policía:', error.message);
+        console.error('Error al subir el archivo:', error.message);
         return { success: false, message: error.message };
     }
 };

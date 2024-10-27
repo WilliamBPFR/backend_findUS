@@ -12,5 +12,9 @@ router.get('/desaparecido/obtenerDesaparecido/:id', desaparecidoController.getDe
 router.get('/desaparecido/obtenerDesaparecidos', desaparecidoController.getAllDesaparecidos);
 router.put('/desaparecido/updateDesaparecido/:id', desaparecidoController.updateDesaparecido);
 router.delete('/desaparecido/deleteDesaparecido/:id', desaparecidoController.deleteDesaparecido);
+router.get('/desaparecido/obtenerDesaparecidosActivosScrollGrande/:page/:limit', desaparecidoController.getDesaparecidosActivosScrollGrande);
+router.get('/desaparecido/obtenerDesaparecidosActivosScrollHorizontal', desaparecidoController.getDesaparecidosActivosScrollHorizontal);
+router.get('/desaparecido/obtenerInfoDesaparecidoByID/:id', desaparecidoController.getInfoDesaparecidoByID);
+router.post('/desaparecido/pruebaLocalidad', desaparecidoController.pruebaLocalidad);
 
 module.exports = router;
