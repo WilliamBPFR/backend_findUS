@@ -39,7 +39,8 @@ const crearFotoPublicacion = async (foto_data) => {
             const { signedUrl, success, error } = await uploadFile(
                 foto_data.base64File,
                 foto_data.fileName,
-                foto_data.mimeType
+                foto_data.mimeType,
+                "Reportes policia"
             );
             if (!success) {
                 throw new Error(`Error subiendo el archivo: ${error.message}`);

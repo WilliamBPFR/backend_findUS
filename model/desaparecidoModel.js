@@ -1,9 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
+const {getLocalidadUbicacion} = require('../services/ubicacion');
 
 // Crear un nuevo desaparecido
 const crearDesaparecido = async (desaparecido_data,user_id) => {
+    const localidad = await getLocalidadUbicacion(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud);
     console.log(desaparecido_data)
     try{
         const desaparecido = await prisma.publicacion.create({
@@ -24,6 +26,7 @@ const crearDesaparecido = async (desaparecido_data,user_id) => {
                 informacioncontacto: desaparecido_data.contacto,
                 ubicacion_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
                 ubicacion_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                localidad_desaparicion: localidad,
                 verificado: false,
                 fechanacimiento: desaparecido_data.fecha_nacimiento,
                 estado: {
@@ -164,11 +167,16 @@ const getInfoDesaparecidoByID = async (id) => {
             id: parseInt(id)
         },
         include:{
+            tipodocumento: true,
+            estado: true,
             fotospublicacion: {
                 select:{
                     urlarchivo: true,
                     idtipofotopublicacion: true
-                }
+                },
+                where:{
+                    idtipofotopublicacion: 1
+                },
             },
             avistamiento:{
                 include:{
@@ -184,7 +192,11 @@ const getInfoDesaparecidoByID = async (id) => {
                             urlfotoperfil: true
                         }
                     }
+                },
+                orderBy:{
+                    id: 'desc'
                 }
+                    
             },
             comentario:{
                 include:{
