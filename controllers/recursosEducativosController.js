@@ -38,9 +38,21 @@ const crearRecursoEducativo = async (req, res) => {
 
     */
     try {
-        const recurso = await recursosEducativosModel.crearRecursoEducativo(req.body);
+        const { idUsuario, idCategoriaMaterial, nombre, descripcion, fileName, fileMimetype, filebase64, urlmaterial } = req.body;
+        let urlMaterial = null;
+        if (filebase64) {
+            const subirMaterial = await recursosEducativosModel.subirArchivo({base64Image:filebase64, fileName:fileName, mimeType:fileMimetype});
+            if (!subirMaterial.success) {
+                throw new Error(`Error subiendo el archivo: ${subirMaterial.message}`);
+            }
+            urlMaterial = subirMaterial.urlMaterial;
+        } else{
+            urlMaterial = urlmaterial;
+        }
+        const recurso = await recursosEducativosModel.crearRecursoEducativo({idUsuario, idCategoriaMaterial, nombre, descripcion, urlMaterial});
         res.status(200).json(recurso);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: error.message });
     }
 }

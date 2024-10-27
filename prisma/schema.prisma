@@ -132,7 +132,7 @@ model recursoeducativo {
   nombre              String?            @db.VarChar(255)
   descripcion         String?            @db.VarChar(255)
   idestado            Int?
-  urlmaterial         String?            @db.VarChar(255)
+  urlmaterial         String?
   fechacreacion       DateTime?          @default(now()) @db.Timestamp(6)
   categoriamaterial   categoriamaterial? @relation(fields: [idcategoriamaterial], references: [id], onDelete: NoAction, onUpdate: NoAction)
   estado              estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
