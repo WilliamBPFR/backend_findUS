@@ -1,4 +1,5 @@
 const desaparecidoModel = require('../model/desaparecidoModel');
+const ubicacionService = require('../services/ubicacion');
 
 // Create post desaparecido
 const createDesaparecido = async (req, res) => {
@@ -104,10 +105,73 @@ const deleteDesaparecido = async (req, res) => {
     }
 };
 
+const getDesaparecidosActivosScrollGrande = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    console.log("entro a getDesaparecidosActivosScrollGrande");
+    const page = parseInt(req.params.page, 10) || 1; // Si no hay página, usa 1 por defecto
+    const limit = parseInt(req.params.limit, 10) || 10; // Si no hay limit, usa 10 por defecto
+    try {
+        const desaparecidos = await desaparecidoModel.getDesaparecidosActivosScrollGrande(page,limit);
+        res.status(200).json(desaparecidos);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const getDesaparecidosActivosScrollHorizontal = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    console.log("entro a getDesaparecidosActivosScrollHorizontal");
+    try {
+        const desaparecidos = await desaparecidoModel.getDesaparecidosActivosScrollHorizontal();
+        res.status(200).json(desaparecidos);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const getInfoDesaparecidoByID = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        const desaparecido = await desaparecidoModel.getInfoDesaparecidoByID(req.params.id);
+        res.status(200).json(desaparecido);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const pruebaLocalidad = async (req, res) => {
+    /*#swagger.tags = ['Desaparecido']
+    #swagger.description = 'Endpoint para obtener la localidad de un desaparecido.'
+    #swagger.parameters['obj'] = {
+        in: 'body',
+        description: 'Latitud y longitud del desaparecido.',
+        required: true,
+        schema: {
+            latitud: -34.603722,
+            longitud: -58.381592
+        }
+    }
+    */
+    
+    try {
+        const ubicacion = await ubicacionService.getLocalidadUbicacion(req.body.latitud,req.body.longitud);
+        res.status(200).json(ubicacion);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
 module.exports = {
     createDesaparecido,
     getDesaparecido,
     getAllDesaparecidos,
     updateDesaparecido,
-    deleteDesaparecido
+    deleteDesaparecido,
+    getDesaparecidosActivosScrollGrande,
+    getDesaparecidosActivosScrollHorizontal,
+    getInfoDesaparecidoByID,
+    pruebaLocalidad
 };

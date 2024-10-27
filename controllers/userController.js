@@ -266,6 +266,16 @@ const modificar_rol_Usuario = async (req, res) => {
     }
 }
 
+const getUserProfilePicture = async (req, res) => {
+    // #swagger.tags = ['User']
+    try {
+        const profilePicture = await userModel.getUserProfilePicture(req.user.id_user);
+        res.status(200).json({urlFotoPerfil: profilePicture});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     registrar_usuario,
     confirmar_correo,
@@ -277,5 +287,6 @@ module.exports = {
     cambiar_contrasena,
     getAllUser,
     getUserById,
-    verificar_token_valido
+    verificar_token_valido,
+    getUserProfilePicture
 };

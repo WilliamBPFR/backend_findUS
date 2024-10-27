@@ -5,7 +5,7 @@ const { decode } = require('base64-arraybuffer');
 const oneYearInSeconds = 365 * 24 * 60 * 60; // 31,536,000 segundos
 
 // Servicio para subir fotos
-const uploadPhoto = async (fileBase64, fileName, mimeType) => {
+const uploadPhoto = async (fileBase64, fileName, mimeType,carpeta) => {
     try {
         const filePath = 'Fotos desaparecidos/' + new Date().getTime() + fileName
 
@@ -54,9 +54,9 @@ const uploadPhoto = async (fileBase64, fileName, mimeType) => {
 };
 
 // Servicio para subir archivos
-const uploadFile = async (fileBase64, fileName, mimeType) => {
+const uploadFile = async (fileBase64, fileName, mimeType,carpeta) => {
     try {
-        const filePath = 'Reportes policia/' + new Date().getTime() + fileName ;
+        const filePath = `${carpeta}/` + new Date().getTime() + fileName ;
 
         // Convertir base64 a ArrayBuffer
         const fileData = decode(fileBase64);
