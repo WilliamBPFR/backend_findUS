@@ -4,6 +4,33 @@ const { uploadPhoto, uploadFile } = require('../services/uploadFilesMaterial');
 
 const prisma = new PrismaClient()
 
+
+const obtenerRecursosEducativosActivos = async (page=1,limit=10) => {
+    const recursos = await prisma.recursoeducativo.findMany({
+        where: {
+            idestado: 1
+        },
+        include: {
+            categoriamaterial: true,
+        },
+        orderBy: {
+            fechacreacion: 'desc'
+        },
+        skip: (parseInt(page)-1)*parseInt(limit),
+        take: parseInt(limit)
+    });
+    return recursos;
+}
+
+
+
+
+
+
+
+
+
+
 const obtenerRecursosEducativos = async () => {
     const recursos = await prisma.recursoEducativo.findMany();
     return recursos;
@@ -110,5 +137,6 @@ module.exports = {
     actualizarRecursoEducativo,
     desactivarRecursoEducativo,
     activarRecursoEducativo,
-    subirArchivo
+    subirArchivo,
+    obtenerRecursosEducativosActivos
 }

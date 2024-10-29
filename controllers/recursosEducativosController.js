@@ -1,5 +1,29 @@
 const recursosEducativosModel = require('../model/recursosEducativosModel');
 
+
+const obtenerRecursosEducativosActivos = async (req, res) => {
+    // #swagger.tags = ['Recursos Educativos']
+    try {
+        const recursos = await recursosEducativosModel.obtenerRecursosEducativosActivos(req.params.page, req.params.limit);
+        res.status(200).json(recursos);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const obtenerRecursosEducativos = async (req, res) => {
     // #swagger.tags = ['Recursos Educativos']
     try {
@@ -108,5 +132,6 @@ module.exports = {
     crearRecursoEducativo,
     actualizarRecursoEducativo,
     desactivarRecursoEducativo,
-    activarRecursoEducativo
+    activarRecursoEducativo,
+    obtenerRecursosEducativosActivos
 }

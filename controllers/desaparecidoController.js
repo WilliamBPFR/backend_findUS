@@ -61,6 +61,59 @@ const createDesaparecido = async (req, res) => {
     // }
 }
 
+const crearComentarioPublicaciones = async (req, res) => {
+    /* #swagger.tags = ['Desaparecido']
+       #swagger.description = 'Endpoint para registrar un comentario en una publicación.'
+       #swagger.parameters['obj'] = {
+                  in: 'body',
+                  description: 'Información del comentario.',
+                  required: true,
+                  schema: {
+                      idusuario: 1,
+                      idpublicacion: 1,
+                      texto: 'Comentario de prueba'
+                 }
+            }
+    */
+
+    try {
+        const comentario = await desaparecidoModel.crearComentarioPublicaciones(req.body,req.user.id_user);
+        if(!comentario.success){
+            return res.status(400).json({ message: "Error al crear el comentario"});
+        }
+        res.status(200).json(comentario.comentario);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const getDesaparecidosTableBO = async (req,res) => {
+    /* #swagger.tags = ['Desaparecido']
+         #swagger.description = 'Endpoint para obtener los desaparecidos en formato de tabla.'
+         #swagger.parameters['obj'] = {
+                    in: 'path',
+                    description: 'Número de página y cantidad de registros por página.',
+                    required: true,
+                    schema: {
+                         page: 1,
+                         limit: 10
+                  }
+            }
+    */
+    try{
+        const filtros = req.query;
+        console.log("filtros",filtros);
+        const desaparecidos = await desaparecidoModel.getDesaparecidosTableBO(req.params.page,req.params.limit, filtros);
+        console.log("desaparecidos",desaparecidos.totalPublicaciones);
+        res.status(200).json(desaparecidos);
+    }catch(error){
+        console.error('Error al obtener los desaparecidos:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
 // Get desaparecido by id
 const getDesaparecido = async (req, res) => {
     // #swagger.tags = ['Desaparecido']
@@ -173,5 +226,7 @@ module.exports = {
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
     getInfoDesaparecidoByID,
-    pruebaLocalidad
+    pruebaLocalidad,
+    crearComentarioPublicaciones,
+    getDesaparecidosTableBO
 };

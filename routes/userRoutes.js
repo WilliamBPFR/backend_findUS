@@ -6,7 +6,7 @@ const {authenticate} = require('../routes/routeAutenthicationService');
 // Rutas protegidas
 router.post('/user/cambiar_contrasena', authenticate, userController.cambiar_contrasena);
 router.get("/user/verificar_token_valido/", authenticate, userController.verificar_token_valido);
-router.get("/user/obtener_foto_perfil_usuario", authenticate, userController.getUserProfilePicture);
+router.get("/user/obtener_info_basica_user", authenticate, userController.getUserInfoForAsyncStorage);
 
 // Rutas públicas
 router.get('/user/:id', userController.getUserById);
@@ -18,5 +18,6 @@ router.put('/user/modificar_usuario', userController.modificar_usuario);
 router.put('/user/cambiar_rol', userController.modificar_rol_Usuario);
 router.post('/user/solicitar_cambio_contrasena', userController.solicitar_cambio_contrasena);
 router.post('/user/verificar_codigo_cambio_contrasena',userController.verificar_codigo_cambio_contrasena);
+router.post('/user/prueba_refesh_token/:token', userController.prueba_refresh_token);
 
 module.exports = router;
