@@ -216,6 +216,84 @@ const getInfoDesaparecidoByID = async (id) => {
 }
 
 
+const crearComentarioPublicaciones = async (comentario,user_id) => {
+    try{
+        const comentarioCreado = await prisma.comentario.create({
+            data:{
+              fechacreacion: new Date(),
+              idpublicacion: parseInt(comentario.idpublicacion),
+              texto: comentario.texto,
+              idusuario: parseInt(user_id)
+            },
+            include:{
+                usuario:{
+                    select:{
+                        nombre: true,
+                        apellido: true,
+                        urlfotoperfil: true
+                    }
+                }
+            }
+        });
+        return {success: true, comentario: comentarioCreado};
+    }catch(error){
+        console.error('Error al crear el comentario:', error);
+        return {success: false, error};
+    }
+}
+
+const getDesaparecidosTableBO = async (page,limit, filtros) => {
+    const desaparecidos = await prisma.publicacion.findMany({
+        select:{
+            id: true,
+            nombredesaparecido: true,
+            fechadesaparicion: true,
+            fechacreacion: true,
+            estado: {
+                select:{
+                    id: true,
+                    nombreestado: true
+                }
+            }
+        },
+        where:{
+            nombredesaparecido: filtros?.nombreDesaparecido ? { contains: filtros?.nombreDesaparecido, mode: 'insensitive' } : undefined,
+            fechadesaparicion: {
+                gte: filtros?.fechaDesde ? new Date(filtros?.fechaDesde) : undefined,
+                lte: filtros?.fechaHasta ? new Date(filtros?.fechaHasta) : undefined,
+            },
+            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined
+        },
+        orderBy: {
+            fechacreacion: 'desc'
+        },
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        take: parseInt(limit)
+    });
+
+    const desaparecidosCount = await prisma.publicacion.count({
+        where:{
+            nombredesaparecido: filtros?.nombreDesaparecido ? { contains: filtros?.nombreDesaparecido, mode: 'insensitive' } : undefined,
+            fechadesaparicion: {
+                gte: filtros?.fechaDesde ? new Date(filtros?.fechaDesde) : undefined,
+                lte: filtros?.fechaHasta ? new Date(filtros?.fechaHasta) : undefined,
+            },
+            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined
+        },
+    });
+
+    return {publicaciones: desaparecidos, totalPublicaciones: desaparecidosCount};
+
+}
+
+
+
+
+
+
+
+
+
 // Actualizar un desaparecido por ID
 const updateDesaparecido = async (id, data) => {
     return await prisma.publicacion.update({
@@ -245,5 +323,7 @@ module.exports = {
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
-    getInfoDesaparecidoByID
+    getInfoDesaparecidoByID,
+    crearComentarioPublicaciones,
+    getDesaparecidosTableBO
 };

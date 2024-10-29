@@ -6,8 +6,10 @@ const {authenticate} = require('../routes/routeAutenthicationService');
 
 // Rutas Protegidas
 router.post('/desaparecido/crearDesaparecido', authenticate, desaparecidoController.createDesaparecido);
+router.post('/desaparecido/crearComentarioPublicaciones',authenticate, desaparecidoController.crearComentarioPublicaciones);
 
 
+router.get('/desaparecido/obtenerDesaparecidoTabla/:page/:limit', desaparecidoController.getDesaparecidosTableBO);
 router.get('/desaparecido/obtenerDesaparecido/:id', desaparecidoController.getDesaparecido);
 router.get('/desaparecido/obtenerDesaparecidos', desaparecidoController.getAllDesaparecidos);
 router.put('/desaparecido/updateDesaparecido/:id', desaparecidoController.updateDesaparecido);

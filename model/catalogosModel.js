@@ -117,6 +117,7 @@ const actualizarIdiomaAplicacion = async (id, idiomaAplicacion) => {
 }
 
 
+
 //Funciones de CRUD para Estado
 const obtenerEstado = async () => {
     return await prisma.estado.findMany();
@@ -142,6 +143,25 @@ const actualizarEstado = async (id, estado) => {
 }
 
 
+const getEstadosPublicaciones = async () => {
+    return await prisma.estado.findMany({
+        select: {
+            id: true,
+            nombreestado: true
+        },
+        where: {
+            OR: [
+                {
+                    tipoestado: "General"
+                },
+                {
+                    tipoestado: "Publicacion"
+                }
+            ]
+        }
+    });
+}
+
 module.exports = {
     obtenerTipoDocumento,
     crearTipoDocumento,
@@ -160,5 +180,6 @@ module.exports = {
     actualizarIdiomaAplicacion,
     obtenerEstado,
     crearEstado,
-    actualizarEstado
+    actualizarEstado,
+    getEstadosPublicaciones
 }

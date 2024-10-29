@@ -290,15 +290,31 @@ const cambiarRolUsuario = async (email, idRol) => {
     return user;
 }
 
-const getUserProfilePicture = async (id) => {
+const getUserInfoForAsyncStorage = async (id) => {
     const user = await prisma.usuario.findFirst({
         where: {
             id: id
         }
     });
-    return user.urlfotoperfil;
+    return {
+        nombreUsuario: user.nombre + " " + user.apellido,
+        urlFotoPerfil: user.urlfotoperfil,
+        idRol: user.idrol
+    };
 }
 
+const prueba_refresh_token = async (token) => {
+    console.log('Prueba Refresh Token:', token);
+    const {data,error} = await supabaseAnon.auth.refreshSession({refresh_token: token});
+    if(error){
+        console.error('Error en la verificación del correo:', error);
+        return { autenticado: false, message: error.message };
+    }
+
+    if(data){
+        return {autenticado: true, message: "Usuario autenticado", token: data};
+    }
+}
 
 module.exports = {
     crearUsuario,
@@ -312,5 +328,6 @@ module.exports = {
     verificarUsuario,
     getUserById,
     getAllUser,
-    getUserProfilePicture
+    getUserInfoForAsyncStorage,
+    prueba_refresh_token
 };

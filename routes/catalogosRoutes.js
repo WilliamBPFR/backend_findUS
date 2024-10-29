@@ -25,5 +25,6 @@ router.put('/idioma_aplicacion/actualizarIdiomaAplicacion/:id', catalogosControl
 router.get('/estado/obtenerEstado', catalogosController.obtenerEstado);
 router.post('/estado/crearEstado', catalogosController.crearEstado);
 router.put('/estado/actualizarEstado/:id', catalogosController.actualizarEstado);
+router.get('/estado/obtenerEstadosPublicaciones', catalogosController.getEstadosPublicaciones);
 
 module.exports = router;
