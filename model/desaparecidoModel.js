@@ -1,9 +1,11 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
+const {getLocalidadUbicacion} = require('../services/ubicacion');
 
 // Crear un nuevo desaparecido
 const crearDesaparecido = async (desaparecido_data,user_id) => {
+    const localidad = await getLocalidadUbicacion(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud);
     console.log(desaparecido_data)
     try{
         const desaparecido = await prisma.publicacion.create({
@@ -24,6 +26,7 @@ const crearDesaparecido = async (desaparecido_data,user_id) => {
                 informacioncontacto: desaparecido_data.contacto,
                 ubicacion_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
                 ubicacion_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                localidad_desaparicion: localidad,
                 verificado: false,
                 fechanacimiento: desaparecido_data.fecha_nacimiento,
                 estado: {
@@ -197,6 +200,137 @@ const getDesaparecidosActivosScrollHorizontal = async () => {
 
 }
 
+const getInfoDesaparecidoByID = async (id) => {
+    const publicacion = await prisma.publicacion.findUnique({
+        where: {
+            id: parseInt(id)
+        },
+        include:{
+            tipodocumento: true,
+            estado: true,
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+                where:{
+                    idtipofotopublicacion: 1
+                },
+            },
+            avistamiento:{
+                include:{
+                    fotosavistamiento: {
+                        select:{
+                            urlarchivo: true,
+                        }
+                    },
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    }
+                },
+                orderBy:{
+                    id: 'desc'
+                }
+                    
+            },
+            comentario:{
+                include:{
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+    return publicacion;
+
+}
+
+
+const crearComentarioPublicaciones = async (comentario,user_id) => {
+    try{
+        const comentarioCreado = await prisma.comentario.create({
+            data:{
+              fechacreacion: new Date(),
+              idpublicacion: parseInt(comentario.idpublicacion),
+              texto: comentario.texto,
+              idusuario: parseInt(user_id)
+            },
+            include:{
+                usuario:{
+                    select:{
+                        nombre: true,
+                        apellido: true,
+                        urlfotoperfil: true
+                    }
+                }
+            }
+        });
+        return {success: true, comentario: comentarioCreado};
+    }catch(error){
+        console.error('Error al crear el comentario:', error);
+        return {success: false, error};
+    }
+}
+
+const getDesaparecidosTableBO = async (page,limit, filtros) => {
+    const desaparecidos = await prisma.publicacion.findMany({
+        select:{
+            id: true,
+            nombredesaparecido: true,
+            fechadesaparicion: true,
+            fechacreacion: true,
+            estado: {
+                select:{
+                    id: true,
+                    nombreestado: true
+                }
+            }
+        },
+        where:{
+            nombredesaparecido: filtros?.nombreDesaparecido ? { contains: filtros?.nombreDesaparecido, mode: 'insensitive' } : undefined,
+            fechadesaparicion: {
+                gte: filtros?.fechaDesde ? new Date(filtros?.fechaDesde) : undefined,
+                lte: filtros?.fechaHasta ? new Date(filtros?.fechaHasta) : undefined,
+            },
+            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined
+        },
+        orderBy: {
+            fechacreacion: 'desc'
+        },
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        take: parseInt(limit)
+    });
+
+    const desaparecidosCount = await prisma.publicacion.count({
+        where:{
+            nombredesaparecido: filtros?.nombreDesaparecido ? { contains: filtros?.nombreDesaparecido, mode: 'insensitive' } : undefined,
+            fechadesaparicion: {
+                gte: filtros?.fechaDesde ? new Date(filtros?.fechaDesde) : undefined,
+                lte: filtros?.fechaHasta ? new Date(filtros?.fechaHasta) : undefined,
+            },
+            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined
+        },
+    });
+
+    return {publicaciones: desaparecidos, totalPublicaciones: desaparecidosCount};
+
+}
+
+
+
+
+
+
+
 
 
 // Actualizar un desaparecido por ID
@@ -228,5 +362,8 @@ module.exports = {
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
-    getDesaparecidosByUser
+    getDesaparecidosByUser,
+    getInfoDesaparecidoByID,
+    crearComentarioPublicaciones,
+    getDesaparecidosTableBO
 };

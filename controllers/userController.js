@@ -266,13 +266,25 @@ const modificar_rol_Usuario = async (req, res) => {
     }
 }
 
-const getUserProfilePicture = async (req, res) => {
+const getUserInfoForAsyncStorage = async (req, res) => {
     // #swagger.tags = ['User']
     try {
-        const profilePicture = await userModel.getUserProfilePicture(req.user.id_user);
-        res.status(200).json({urlFotoPerfil: profilePicture});
+        const profilePicture = await userModel.getUserInfoForAsyncStorage(req.user.id_user);
+        res.status(200).json(profilePicture);
     } catch (error) {
         res.status(500).json({ message: error.message });
+    }
+}
+
+const prueba_refresh_token = async (req, res) => {
+    // #swagger.tags = ['User']
+    try {
+        console.log("REFRESH TOKEN");
+        const usuario = await userModel.prueba_refresh_token(req.params.token);
+        return res.status(200).json({ message: "Token actualizado correctamente", token: usuario.token });
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
     }
 }
 
@@ -288,5 +300,6 @@ module.exports = {
     getAllUser,
     getUserById,
     verificar_token_valido,
-    getUserProfilePicture
+    getUserInfoForAsyncStorage,
+    prueba_refresh_token
 };

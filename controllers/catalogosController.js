@@ -315,6 +315,17 @@ const actualizarEstado = async (req, res) => {
     }
 }
 
+const getEstadosPublicaciones = async (req, res) => {
+    // #swagger.tags = ['Estado']
+    try {
+        const estados = await catalogosModel.getEstadosPublicaciones();
+        res.status(200).json(estados);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: error.message});
+    }
+}
+
 module.exports = {
     obtenerTipoDocumento,
     crearTipoDocumento,
@@ -333,5 +344,6 @@ module.exports = {
     actualizarIdiomaAplicacion,
     obtenerEstado,
     crearEstado,
-    actualizarEstado
+    actualizarEstado,
+    getEstadosPublicaciones
 }
