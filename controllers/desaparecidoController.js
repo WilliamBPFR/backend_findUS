@@ -184,6 +184,16 @@ const getDesaparecidosActivosScrollHorizontal = async (req, res) => {
     }
 }
 
+const getDesaparecidosByUser = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        const desaparecidos = await desaparecidoModel.getDesaparecidosByUser(req.user.id_user);
+        res.status(200).json(desaparecidos);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const getInfoDesaparecidoByID = async (req, res) => {
     // #swagger.tags = ['Desaparecido']
     try {
@@ -225,6 +235,7 @@ module.exports = {
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
+    getDesaparecidosByUser,
     getInfoDesaparecidoByID,
     pruebaLocalidad,
     crearComentarioPublicaciones,
