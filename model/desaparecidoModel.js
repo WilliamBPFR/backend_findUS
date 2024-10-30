@@ -72,6 +72,45 @@ const getAllDesaparecidos = async () => {
     return await prisma.publicacion.findMany();
 }
 
+// obtener todos los desparecidos de un usuario
+const getDesaparecidosByUser = async (id) => {
+    console.log("ID del usuario: ", id);
+    try {
+        return await prisma.publicacion.findMany({
+            where: {
+                idusuario: parseInt(id)
+            },
+            select:{
+                id: true,
+                nombredesaparecido: true,
+                fechadesaparicion: true,
+                estado: {
+                    select:{
+                        id: true,
+                        nombreestado: true
+                    }
+                },
+                verificado: true,
+                fotospublicacion: {
+                    select:{
+                        urlarchivo: true,
+                        idtipofotopublicacion: true
+                    },
+                    where:{
+                        idtipofotopublicacion: 1
+                    }
+                }
+            },
+            orderBy:{
+                fechacreacion: 'desc'
+            }
+        });
+    } catch (error) {
+        console.error('Error al obtener los desaparecidos del usuario:', error);
+        return { success: false, error };
+    }
+}
+
 const getCantidadDesaparecidosActivos = async () => {
     return await prisma.publicacion.count({
         where: {
@@ -323,6 +362,7 @@ module.exports = {
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
+    getDesaparecidosByUser,
     getInfoDesaparecidoByID,
     crearComentarioPublicaciones,
     getDesaparecidosTableBO
