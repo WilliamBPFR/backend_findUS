@@ -22,8 +22,8 @@ const crearDesaparecido = async (desaparecido_data,user_id) => {
                 descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
                 relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
                 informacioncontacto: desaparecido_data.contacto,
-                ubicaci_n_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
-                ubicaci_n_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                ubicacion_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
+                ubicacion_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
                 verificado: false,
                 fechanacimiento: desaparecido_data.fecha_nacimiento,
                 estado: {
@@ -67,6 +67,45 @@ const getDesaparecidoById = async (id) => {
 // Obtener todos los desaparecidos
 const getAllDesaparecidos = async () => {
     return await prisma.publicacion.findMany();
+}
+
+// obtener todos los desparecidos de un usuario
+const getDesaparecidosByUser = async (id) => {
+    console.log("ID del usuario: ", id);
+    try {
+        return await prisma.publicacion.findMany({
+            where: {
+                idusuario: parseInt(id)
+            },
+            select:{
+                id: true,
+                nombredesaparecido: true,
+                fechadesaparicion: true,
+                estado: {
+                    select:{
+                        id: true,
+                        nombreestado: true
+                    }
+                },
+                verificado: true,
+                fotospublicacion: {
+                    select:{
+                        urlarchivo: true,
+                        idtipofotopublicacion: true
+                    },
+                    where:{
+                        idtipofotopublicacion: 1
+                    }
+                }
+            },
+            orderBy:{
+                fechacreacion: 'desc'
+            }
+        });
+    } catch (error) {
+        console.error('Error al obtener los desaparecidos del usuario:', error);
+        return { success: false, error };
+    }
 }
 
 const getCantidadDesaparecidosActivos = async () => {
@@ -188,5 +227,6 @@ module.exports = {
     updateDesaparecido,
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
-    getDesaparecidosActivosScrollHorizontal
+    getDesaparecidosActivosScrollHorizontal,
+    getDesaparecidosByUser
 };

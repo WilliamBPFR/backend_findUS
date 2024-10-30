@@ -6,6 +6,7 @@ const {authenticate} = require('../routes/routeAutenthicationService');
 
 // Rutas Protegidas
 router.post('/desaparecido/crearDesaparecido', authenticate, desaparecidoController.createDesaparecido);
+router.get('/desaparecido/obtenerDesaparecidosByUser', authenticate, desaparecidoController.getDesaparecidosByUser);
 
 
 router.get('/desaparecido/obtenerDesaparecido/:id', desaparecidoController.getDesaparecido);
