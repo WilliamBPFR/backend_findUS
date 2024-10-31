@@ -11,9 +11,40 @@ const obtenerRecursosEducativosActivos = async (req, res) => {
     }
 }
 
+const getMaterialEducativoTableBO = async (req,res) => {
+    /* #swagger.tags = ['Recursos Educativos']
+         #swagger.description = 'Endpoint para obtener los Recursos Educativos en formato de tabla.'
+         #swagger.parameters['obj'] = {
+                    in: 'path',
+                    description: 'Número de página y cantidad de registros por página.',
+                    required: true,
+                    schema: {
+                         page: 1,
+                         limit: 10
+                  }
+            }
+    */
+    try{
+        const filtros = req.query;
+        console.log("filtros",filtros);
+        const recursosEducativos = await recursosEducativosModel.getMaterialEducativoTableBO(req.params.page,req.params.limit, filtros);
+        res.status(200).json(recursosEducativos);
+    }catch(error){
+        console.error('Error al obtener los Recursos Educativos:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
 
 
-
+const getMaterialEducativoByID = async (req, res) => {
+    // #swagger.tags = ['Recursos Educativos']
+    try {
+        const materialEducativo = await recursosEducativosModel.getMaterialEducativoByID(req.params.id);
+        res.status(200).json(materialEducativo);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 
 
 
@@ -133,5 +164,7 @@ module.exports = {
     actualizarRecursoEducativo,
     desactivarRecursoEducativo,
     activarRecursoEducativo,
-    obtenerRecursosEducativosActivos
+    obtenerRecursosEducativosActivos,
+    getMaterialEducativoTableBO,
+    getMaterialEducativoByID
 }
