@@ -19,5 +19,6 @@ router.put('/user/cambiar_rol', userController.modificar_rol_Usuario);
 router.post('/user/solicitar_cambio_contrasena', userController.solicitar_cambio_contrasena);
 router.post('/user/verificar_codigo_cambio_contrasena',userController.verificar_codigo_cambio_contrasena);
 router.post('/user/prueba_refesh_token/:token', userController.prueba_refresh_token);
+router.get('/user/obtenerUsuariosTabla/:page/:limit', userController.getUsuariosTableBO);
 
 module.exports = router;

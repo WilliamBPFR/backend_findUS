@@ -26,6 +26,7 @@ router.get('/estado/obtenerEstado', catalogosController.obtenerEstado);
 router.post('/estado/crearEstado', catalogosController.crearEstado);
 router.put('/estado/actualizarEstado/:id', catalogosController.actualizarEstado);
 router.get('/estado/obtenerEstadosPublicaciones', catalogosController.getEstadosPublicaciones);
+router.get('/estado/obtenerEstadosGeneral', catalogosController.getEstadosGeneral);
 router.get('/estado/obtenerEstadosMaterialEducativo', catalogosController.getEstadosMaterialEducativo);
 router.get('/tipo_material_educativo/obtenerTipoMaterialEducativo', catalogosController.getTiposMaterialEducativo);
 
