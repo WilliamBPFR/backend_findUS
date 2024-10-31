@@ -11,4 +11,7 @@ router.put('/recursos_educativos/:id', recursosEducativosController.actualizarRe
 router.delete('/recursos_educativos/:id', recursosEducativosController.desactivarRecursoEducativo);
 router.put('/recursos_educativos/:id/activar', recursosEducativosController.activarRecursoEducativo);
 
+router.get('/recursos_educativos/obtenerMaterialEducativoTabla/:page/:limit', recursosEducativosController.getMaterialEducativoTableBO);
+router.get('/recursos_educativos/obtenerMaterialEducativoByID/:id', recursosEducativosController.getMaterialEducativoByID);
+
 module.exports = router;

@@ -1,5 +1,5 @@
 const { PrismaClient,  } = require('@prisma/client');
-const { uploadPhoto, uploadFile } = require('../services/uploadFilesMaterial');
+const { uploadFile } = require('../services/uploadFiles.js');
 
 
 const prisma = new PrismaClient()
@@ -22,8 +22,67 @@ const obtenerRecursosEducativosActivos = async (page=1,limit=10) => {
     return recursos;
 }
 
+const getMaterialEducativoByID = async (id) => {
+    const materialEducativo = await prisma.recursoeducativo.findFirst({
+        where:{
+            id: parseInt(id)
+        },
+        include:{
+            categoriamaterial:true,
+            estado:true,
+            usuario:{
+                select:{
+                    id:true,
+                    nombre:true,
+                    apellido:true
+                }
+            }
+        }
+    });
+    return materialEducativo;
+}
 
+const getMaterialEducativoTableBO = async (page,limit, filtros) => {
+    const materialEducativo = await prisma.recursoeducativo.findMany({
+        select:{
+            id:true,
+            nombre:true,
+            fechacreacion:true,
+            estado:{
+                select:{
+                    id:true,
+                    nombreestado:true
+                }
+            },
+            categoriamaterial:{
+                select:{
+                    id:true,
+                    nombrecategoriamaterial:true
+                }
+            }
+        },
+        where:{
+            nombre: filtros?.nombreMaterial ? { contains: filtros?.nombreMaterial, mode: 'insensitive' } : undefined,
+            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined,
+            categoriamaterial: filtros?.tipoMaterial ? { id: parseInt(filtros?.tipoMaterial) } : undefined,
+        },
+        orderBy: {
+            fechacreacion: 'desc'
+        },
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        take: parseInt(limit)
+    });
 
+    const recursosCant = await prisma.recursoeducativo.count({
+        where:{
+            nombre: filtros?.nombreMaterial ? { contains: filtros?.nombreMaterial, mode: 'insensitive' } : undefined,
+            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined,
+            idcategoriamaterial: filtros?.tipoMaterialEducativo ? { id: parseInt(filtros?.tipoMaterialEducativo) } : undefined,
+        }
+    });
+
+    return {materialesEducativos: materialEducativo, totalMateriales: recursosCant};
+}
 
 
 
@@ -65,7 +124,7 @@ const subirArchivo = async (foto_data) => {
     try {
         // Si el usuario ha proporcionado una imagen, sube la imagen
         
-            const { signedUrl, success, error } = await uploadPhoto(
+            const { signedUrl, success, error } = await uploadFile(
                 foto_data.base64Image,
                 foto_data.fileName,
                 foto_data.mimeType
@@ -138,5 +197,7 @@ module.exports = {
     desactivarRecursoEducativo,
     activarRecursoEducativo,
     subirArchivo,
-    obtenerRecursosEducativosActivos
+    obtenerRecursosEducativosActivos,
+    getMaterialEducativoTableBO,
+    getMaterialEducativoByID
 }
