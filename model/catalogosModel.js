@@ -162,6 +162,18 @@ const getEstadosPublicaciones = async () => {
     });
 }
 
+const getEstadosGeneral = async () => {
+    return await prisma.estado.findMany({
+        select: {
+            id: true,
+            nombreestado: true
+        },
+        where: {
+            tipoestado: "General"
+        }
+    });
+}
+
 module.exports = {
     obtenerTipoDocumento,
     crearTipoDocumento,
@@ -181,5 +193,6 @@ module.exports = {
     obtenerEstado,
     crearEstado,
     actualizarEstado,
-    getEstadosPublicaciones
+    getEstadosPublicaciones,
+    getEstadosGeneral
 }

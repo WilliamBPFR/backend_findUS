@@ -288,6 +288,17 @@ const prueba_refresh_token = async (req, res) => {
     }
 }
 
+const getUsuariosTableBO = async (req, res) => {
+    // #swagger.tags = ['User']
+    try {
+        const usuarios = await userModel.getUsuarioTableBO(req.params.page, req.params.limit,req.query);
+        res.status(200).json(usuarios);
+    } catch (error) {
+        console.error('Error al obtener los usuarios:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     registrar_usuario,
     confirmar_correo,
@@ -301,5 +312,6 @@ module.exports = {
     getUserById,
     verificar_token_valido,
     getUserInfoForAsyncStorage,
-    prueba_refresh_token
+    prueba_refresh_token,
+    getUsuariosTableBO
 };

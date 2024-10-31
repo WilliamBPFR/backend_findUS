@@ -26,5 +26,6 @@ router.get('/estado/obtenerEstado', catalogosController.obtenerEstado);
 router.post('/estado/crearEstado', catalogosController.crearEstado);
 router.put('/estado/actualizarEstado/:id', catalogosController.actualizarEstado);
 router.get('/estado/obtenerEstadosPublicaciones', catalogosController.getEstadosPublicaciones);
+router.get('/estado/obtenerEstadosGeneral', catalogosController.getEstadosGeneral);
 
 module.exports = router;
