@@ -336,6 +336,28 @@ const getEstadosGeneral = async (req, res) => {
         res.status(500).json({error: error.message});
     }
 }
+const getEstadosMaterialEducativo = async (req, res) => {
+    // #swagger.tags = ['Estado']
+    try {
+        const estados = await catalogosModel.getEstadosMaterialEducativo();
+        res.status(200).json(estados);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: error.message});
+    }
+}
+
+const getTiposMaterialEducativo = async (req, res) => {
+    // #swagger.tags = ['Tipo Material Educativo']
+    try {
+        const tipos = await catalogosModel.getTiposMaterialEducativo();
+        console.log(tipos);
+        res.status(200).json(tipos);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: error.message});
+    }
+}
 
 module.exports = {
     obtenerTipoDocumento,
@@ -357,5 +379,7 @@ module.exports = {
     crearEstado,
     actualizarEstado,
     getEstadosPublicaciones,
-    getEstadosGeneral
+    getEstadosGeneral,
+    getEstadosMaterialEducativo,
+    getTiposMaterialEducativo
 }

@@ -102,9 +102,9 @@ const getDesaparecidosTableBO = async (req,res) => {
     */
     try{
         const filtros = req.query;
-        console.log("filtros",filtros);
+        // console.log("filtros",filtros);
         const desaparecidos = await desaparecidoModel.getDesaparecidosTableBO(req.params.page,req.params.limit, filtros);
-        console.log("desaparecidos",desaparecidos.totalPublicaciones);
+        // console.log("desaparecidos",desaparecidos.totalPublicaciones);
         res.status(200).json(desaparecidos);
     }catch(error){
         console.error('Error al obtener los desaparecidos:', error);

@@ -8,5 +8,6 @@ router.post('/avistamiento/crearAvistamiento', avistamientoController.crearAvist
 router.post('/avistamiento/subirFotoAvistamiento', avistamientoController.crearFotoAvistamiento);
 router.put('/avistamiento/:id', avistamientoController.updateAvistamiento);
 router.delete('/avistamiento/:id', avistamientoController.deleteAvistamiento);
+router.get('/avistamiento/obtenerAvistamientoPublicacion/:idPublicacion', avistamientoController.getAvistamientoPublicacion);
 
 module.exports = router;

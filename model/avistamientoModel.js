@@ -24,6 +24,31 @@ const crearAvistamiento = async (avistamiento_data,id_usuario) => {
     return avistamiento;
 }
 
+const getAvistamientoPublicacion = async (idPublicacion) => {
+    return await prisma.avistamiento.findMany({
+        include: {
+            fotosavistamiento:{
+                select: {
+                    urlarchivo: true,
+                }
+            },
+            usuario:{
+                select:{
+                    nombre: true,
+                    apellido: true,
+                    urlfotoperfil: true
+                }
+            }
+        },
+        where: {
+            idpublicacion: parseInt(idPublicacion),
+        },
+        orderBy:{
+            id: 'desc'
+        }
+    });
+}
+
 const crearFotoAvistamiento = async (foto_data) => {
     try{
         const { signedUrl, success, error } = await uploadFile(
@@ -121,5 +146,6 @@ module.exports = {
     getAllAvistamientos,
     updateAvistamiento,
     deleteAvistamiento,
-    crearFotoAvistamiento
+    crearFotoAvistamiento,
+    getAvistamientoPublicacion
 };

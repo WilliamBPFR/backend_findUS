@@ -174,6 +174,28 @@ const getEstadosGeneral = async () => {
     });
 }
 
+const getEstadosMaterialEducativo = async () => {
+    return await prisma.estado.findMany({
+        select: {
+            id: true,
+            nombreestado: true
+        },
+        where: {
+            OR: [
+                {
+                    tipoestado: "General"
+                },
+                {
+                    tipoestado: "Material Educativo"
+                }
+            ]
+        }
+    });
+}
+
+const getTiposMaterialEducativo = async () => {
+    return await prisma.categoriamaterial.findMany();
+}
 module.exports = {
     obtenerTipoDocumento,
     crearTipoDocumento,
@@ -194,5 +216,7 @@ module.exports = {
     crearEstado,
     actualizarEstado,
     getEstadosPublicaciones,
-    getEstadosGeneral
+    getEstadosGeneral,
+    getEstadosMaterialEducativo,
+    getTiposMaterialEducativo
 }
