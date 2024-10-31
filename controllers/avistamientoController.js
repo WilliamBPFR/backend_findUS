@@ -9,20 +9,34 @@ const crearAvistamiento = async (req, res) => {
               description: 'Información del avistamiento.',
               required: true,
               schema: {
+                datosAvistamiento: {
                   idusuario: 1,
                   idpublicacion: 1,
                   ubicacion_desaparicion_latitud: "10.333",
                   ubicacion_desaparicion_longitud: "11.333",
                   fechahora: 1/1/2021,
                   detalles: "KLKKKKK",
-              }
+                },
+                dataFoto: {
+                  idusuario: 1,
+                  idpublicacion: 1,
+                  foto: "base64",
+                }
+}           
          }
 
     */
     try {
-        const avistamiento = await avistamientoModel.crearAvistamiento(req.body,34);
+        console.log("Datos de la Peticion",req.body);
+        const avistamiento = await avistamientoModel.crearAvistamiento(req.body.dataAvistamiento,34);
         if(!avistamiento){
             return res.status(400).json({ message: "Error al crear el avistamiento"});
+        }
+
+        const fotoAvistamiento = await avistamientoModel.crearFotoAvistamiento({...req.body.dataFoto, idavistamiento: avistamiento.id});
+
+        if(!fotoAvistamiento.success){
+            return res.status(400).json({ message: "Error al crear la foto del avistamiento"});
         }
         return res.status(200).json({ message: "Avistamiento creado exitosamente", idAvistamiento: avistamiento.id});
     } catch (error) {
@@ -30,6 +44,18 @@ const crearAvistamiento = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+const getAvistamientoPublicacion = async (req, res) => {
+    // #swagger.tags = ['Avistamiento']
+    try {
+        console.log("Id Publicacion",req.params.idPublicacion);
+        const avistamiento = await avistamientoModel.getAvistamientoPublicacion(req.params.idPublicacion);
+        console.log("Avistamiento",avistamiento);
+        res.status(200).json(avistamiento);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 const crearFotoAvistamiento = async (req, res) => {
     /* #swagger.tags = ['Avistamiento']
@@ -98,4 +124,5 @@ module.exports = {
     updateAvistamiento,
     deleteAvistamiento,
     crearFotoAvistamiento,
+    getAvistamientoPublicacion
 };
