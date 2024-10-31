@@ -316,6 +316,48 @@ const prueba_refresh_token = async (token) => {
     }
 }
 
+const getUsuarioTableBO = async (page, limit, filtros) => {
+    // Construir el array de condiciones, excluyendo cualquier condición que sea `undefined`
+    const condiciones = [
+        filtros?.nombreCompleto ? {
+            OR: [
+                { nombre: { contains: filtros.nombreCompleto, mode: 'insensitive' } },
+                { apellido: { contains: filtros.nombreCompleto, mode: 'insensitive' } }
+            ]
+        } : null,
+        filtros?.rol ? { rol: { id: parseInt(filtros.rol) } } : null,
+        filtros?.estatus ? { estado: { id: parseInt(filtros.estatus) } } : null
+    ].filter(condicion => condicion !== null); // Filtra valores `null`
+
+    const usuarios = await prisma.usuario.findMany({
+        select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            rol: true,
+            estado: true,
+            fechacreacion: true
+        },
+        where: {
+            AND: condiciones
+        },
+        orderBy: {
+            fechacreacion: 'desc'
+        },
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        take: parseInt(limit)
+    });
+
+    const usuariosCount = await prisma.usuario.count({
+        where:{
+            nombre: filtros?.nombre ? { contains: filtros.nombre, mode: 'insensitive' } : undefined,
+            rol: filtros?.rol? { id: parseInt(filtros?.rol) } : undefined,
+        }
+    });
+    return {usuarios, usuariosCount};
+}
+
 module.exports = {
     crearUsuario,
     usuarioExistnente,
@@ -329,5 +371,6 @@ module.exports = {
     getUserById,
     getAllUser,
     getUserInfoForAsyncStorage,
-    prueba_refresh_token
+    prueba_refresh_token,
+    getUsuarioTableBO
 };
