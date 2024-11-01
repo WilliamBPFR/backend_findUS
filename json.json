@@ -1,0 +1,29 @@
+{
+    "fechacreacion": "2024-10-21T01:09:11.578Z",
+    "nombredesaparecido": "Prueba7",
+    "descripcionpersonadesaparecido": "efefe",
+    "fechadesaparicion": "2024-10-20T00:00:00.000Z",
+    "usuario": {
+      "nombre": "Luis",
+      "apellido": "Adames",
+      "urlfotoperfil": "https://img.freepik.com/psd-gratis/ilustracion-3d-avatar-o-perfil-humano_23-2150671142.jpg"
+    },
+    "fotospublicacion": []
+  },
+  {
+    "fechacreacion": "2024-10-21T01:04:56.241Z",
+    "nombredesaparecido": "Prueba7",
+    "descripcionpersonadesaparecido": "efefe",
+    "fechadesaparicion": "2024-10-20T00:00:00.000Z",
+    "usuario": {
+      "nombre": "Luis",
+      "apellido": "Adames",
+      "urlfotoperfil": "https://img.freepik.com/psd-gratis/ilustracion-3d-avatar-o-perfil-humano_23-2150671142.jpg"
+    },
+    "fotospublicacion": [
+      {
+        "urlarchivo": "https://rmmjqtigwdgygmsibvuh.supabase.co/storage/v1/object/sign/assets/Fotos%20desaparecidos/Foto_Perfil_.2024-10-21.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhc3NldHMvRm90b3MgZGVzYXBhcmVjaWRvcy9Gb3RvX1BlcmZpbF8uMjAyNC0xMC0yMS5qcGciLCJpYXQiOjE3Mjk0NzI3MDIsImV4cCI6MTc2MTAwODcwMn0.zW68jtdLj69t8lQDf5VGJyXhqJWb4ohrVpvzZk_YBis",
+        "idtipofotopublicacion": 1
+      }
+    ]
+  },
