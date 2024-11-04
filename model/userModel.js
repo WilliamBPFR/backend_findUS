@@ -366,7 +366,8 @@ const getUsuarioTableBO = async (page, limit, filtros) => {
             email: true,
             rol: true,
             estado: true,
-            fechacreacion: true
+            fechacreacion: true,
+            verificado: true
         },
         where: {
             AND: condiciones
