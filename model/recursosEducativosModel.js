@@ -148,18 +148,25 @@ const subirArchivo = async (foto_data) => {
 };
 
 
-const actualizarRecursoEducativo = async (id, recurso_data) => {
+const editarRecursoEducativo = async (id, recurso_data) => {
+    if (recurso_data.imageData){
+        const subirMaterial = await subirArchivo(recurso_data.imageData);
+        if (!subirMaterial.success) {
+            throw new Error(`Error subiendo el archivo: ${subirMaterial.message}`);
+        }
+        recurso_data.urlmaterial = subirMaterial.urlMaterial;
+    }
+
     const recurso = await prisma.recursoeducativo.update({
         where: {
-            id: id
+            id: parseInt(id)
         },
         data: {
-            idusuario: recurso_data.idUsuario,
-            idcategoriamaterial: recurso_data.idCategoriaMaterial,
+            idcategoriamaterial: parseInt(recurso_data.idCategoriaMaterial),
             nombre: recurso_data.nombre,
             descripcion: recurso_data.descripcion,
-            idestado: 1,
-            urlmaterial: recurso_data.urlMaterial,
+            urlmaterial: recurso_data.urlmaterial,
+            fecha_modificacion: new Date(),
         }
     })
     return recurso;
@@ -168,10 +175,10 @@ const actualizarRecursoEducativo = async (id, recurso_data) => {
 const desactivarRecursoEducativo = async (id) => {
     const recurso = await prisma.recursoeducativo.update({
         where: {
-            id: id
+            id: parseInt(id)
         },
         data: {
-            idEstado: 2
+            idestado: 2
         }
     })
     return recurso;
@@ -180,24 +187,30 @@ const desactivarRecursoEducativo = async (id) => {
 const activarRecursoEducativo = async (id) => {
     const recurso = await prisma.recursoeducativo.update({
         where: {
-            id: id
+            id: parseInt(id)
         },
         data: {
-            idEstado: 1
+            idestado: 1
         }
     })
     return recurso;
 }
 
+
 module.exports = {
     obtenerRecursosEducativos,
     obtenerRecursoEducativo,
     crearRecursoEducativo,
-    actualizarRecursoEducativo,
+
+
+    editarRecursoEducativo,
     desactivarRecursoEducativo,
     activarRecursoEducativo,
+
+
+
     subirArchivo,
     obtenerRecursosEducativosActivos,
     getMaterialEducativoTableBO,
-    getMaterialEducativoByID
+    getMaterialEducativoByID,
 }

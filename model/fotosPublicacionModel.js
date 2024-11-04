@@ -72,6 +72,87 @@ const crearFotoPublicacion = async (foto_data) => {
     }
 };
 
+
+const   updateFotoPublicacionBO = async (foto_data) => {
+    console.log('foto_data:', foto_data);
+    try{
+        const { signedUrl, success, error } = await uploadFile(
+            foto_data.base64Image,
+            foto_data.fileName,
+            foto_data.mimeType,
+            "Fotos desaparecidos"
+        );
+
+        if (!success) {
+            throw new Error(`Error subiendo el archivo: ${error.message}`);
+        }
+
+        // Actualizando el registro en la tabla fotospublicacion con la URL del archivo
+        const fotoPublicacion = await prisma.fotospublicacion.update({
+            where: {
+                id: foto_data.id,
+            },
+            data: {
+                urlarchivo: signedUrl, // Usamos la URL generada (firmada)
+                fechacreacion: new Date(),
+            },
+        });
+
+        console.log('Foto actualizada:', fotoPublicacion);
+        return {
+            success: true,
+            message: 'Foto actualizada correctamente.',
+        };
+    }
+    catch (error) {
+        console.error('Error actualizando foto publicacion:', error.message);
+        return {
+            success: false,
+            message: error.message,
+        };
+    }
+}
+
+const updateArchivoPoliciaPublicacionBO = async (foto_data) => {
+    try{
+        const { signedUrl, success, error } = await uploadFile(
+            foto_data.base64File,
+            foto_data.fileName,
+            foto_data.mimeType,
+            "Reportes policia"
+        );
+
+        if (!success) {
+            throw new Error(`Error subiendo el archivo: ${error.message}`);
+        }
+
+        // Actualizando el registro en la tabla fotospublicacion con la URL del archivo
+        const fotoPublicacion = await prisma.fotospublicacion.update({
+            where: {
+                id: foto_data.id,
+            },
+            data: {
+                urlarchivo: signedUrl, // Usamos la URL generada (firmada)
+                fechacreacion: new Date(),
+            },
+        });
+
+        console.log('Archivo actualizado:', fotoPublicacion);
+        return {
+            success: true,
+            message: 'Archivo actualizado correctamente.',
+        };
+    }
+    catch (error) {
+        console.error('Error actualizando foto publicacion:', error.message);
+        return {
+            success: false,
+            message: error.message,
+        };
+    }
+}
 module.exports = {
     crearFotoPublicacion,
+    updateFotoPublicacionBO,
+    updateArchivoPoliciaPublicacionBO
 };

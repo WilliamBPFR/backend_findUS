@@ -112,7 +112,7 @@ const crearRecursoEducativo = async (req, res) => {
     }
 }
 
-const actualizarRecursoEducativo = async (req, res) => {
+const editarRecursoEducativo = async (req, res) => {
     /* #swagger.tags = ['Recursos Educativos']
        #swagger.description = 'Endpoint para actualizar un recurso educativo.'
        #swagger.parameters['obj'] = {
@@ -130,17 +130,18 @@ const actualizarRecursoEducativo = async (req, res) => {
 
     */
     try {
-        const recurso = await recursosEducativosModel.actualizarRecursoEducativo(req.params.id, req.body);
+        const recurso = await recursosEducativosModel.editarRecursoEducativo(req.params.id, req.body);
         res.status(200).json(recurso);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
 
+
 const desactivarRecursoEducativo = async (req, res) => {
     // #swagger.tags = ['Recursos Educativos']
     try {
-        const recurso = await recursosEducativosModel.eliminarRecursoEducativo(req.params.id);
+        const recurso = await recursosEducativosModel.desactivarRecursoEducativo(req.params.id);
         res.status(200).json(recurso);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -161,9 +162,13 @@ module.exports = {
     obtenerRecursosEducativos,
     obtenerRecursoEducativo,
     crearRecursoEducativo,
-    actualizarRecursoEducativo,
+
+
+    editarRecursoEducativo,
     desactivarRecursoEducativo,
     activarRecursoEducativo,
+
+
     obtenerRecursosEducativosActivos,
     getMaterialEducativoTableBO,
     getMaterialEducativoByID
