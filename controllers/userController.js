@@ -223,7 +223,7 @@ const modificar_usuario = async (req, res) => {
     */
     try {
         const usuario = await userModel.modificarUsuario(req.body);
-        return res.status(200).json({ message: "Usuario modificado correctamente"});
+        return res.status(200).json({ message: "Usuario modificado correctamente", usuario: usuario });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -261,6 +261,19 @@ const modificar_rol_Usuario = async (req, res) => {
     try {
         const usuario = await userModel.cambiarRolUsuario(req.body.email, req.body.idRol);
         return res.status(200).json({ message: "Rol de usuario modificado correctamente"});
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+const updateAdminAUsuario = async (req, res) => {
+    // #swagger.tags = ['User']
+    const iduser = parseInt(req.params.id);
+    try {
+        const usuario = await userModel.modificarAdminAUsuario(iduser, req.body);
+        console.log("id", req.params)
+        console.log(usuario);
+        return res.status(200).json({ message: "Usuario actualizado correctamente", usuario: usuario });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -313,5 +326,6 @@ module.exports = {
     verificar_token_valido,
     getUserInfoForAsyncStorage,
     prueba_refresh_token,
-    getUsuariosTableBO
+    getUsuariosTableBO,
+    updateAdminAUsuario
 };
