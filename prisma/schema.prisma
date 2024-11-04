@@ -19,6 +19,7 @@ model avistamiento {
   ubicacion_desaparicion_latitud  String?
   ubicacion_desaparicion_longitud String?
   localidad_avistamiento          String?
+  fecha_modificacion              DateTime?           @db.Timestamp(6)
   estado                          estado?             @relation(fields: [idestatus], references: [id], onDelete: NoAction, onUpdate: NoAction)
   publicacion                     publicacion?        @relation(fields: [idpublicacion], references: [id], onDelete: NoAction, onUpdate: NoAction)
   usuario                         usuario?            @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -77,11 +78,12 @@ model estado {
 }
 
 model fotosavistamiento {
-  id             Int           @id @default(autoincrement())
-  urlarchivo     String?
-  idavistamiento Int?
-  fechacreacion  DateTime?     @default(now()) @db.Timestamp(6)
-  avistamiento   avistamiento? @relation(fields: [idavistamiento], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                 Int           @id @default(autoincrement())
+  urlarchivo         String?
+  idavistamiento     Int?
+  fechacreacion      DateTime?     @default(now()) @db.Timestamp(6)
+  fecha_modificacion DateTime?     @db.Timestamp(6)
+  avistamiento       avistamiento? @relation(fields: [idavistamiento], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model fotospublicacion {
@@ -119,6 +121,7 @@ model publicacion {
   fechacreacion                   DateTime?          @default(now()) @db.Timestamp(6)
   fechanacimiento                 DateTime?          @db.Timestamp(6)
   localidad_desaparicion          String?
+  fechaactualizacion              DateTime?          @db.Timestamp(6)
   avistamiento                    avistamiento[]
   chatpublicacion                 chatpublicacion[]
   comentario                      comentario[]
@@ -137,6 +140,7 @@ model recursoeducativo {
   idestado            Int?
   urlmaterial         String?
   fechacreacion       DateTime?          @default(now()) @db.Timestamp(6)
+  fecha_modificacion  DateTime?          @db.Timestamp(6)
   categoriamaterial   categoriamaterial? @relation(fields: [idcategoriamaterial], references: [id], onDelete: NoAction, onUpdate: NoAction)
   estado              estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
   usuario             usuario?           @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)

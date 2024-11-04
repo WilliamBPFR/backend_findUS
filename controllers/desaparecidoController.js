@@ -227,6 +227,62 @@ const pruebaLocalidad = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+const obtenerInformacionEditarPublicacionBO = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        const publicacion = await desaparecidoModel.obtenerInformacionEditarPublicacionBO(req.params.id);
+        res.status(200).json(publicacion);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const updateDesaparecidoBO = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        const desaparecido = await desaparecidoModel.updateDesaparecidoBO(req.params.id, req.body);
+        console.log("desaparecido actualizado",desaparecido);
+        if(!desaparecido.success){
+            return res.status(400).json({ message: "Error al actualizar la publicación"});
+        }
+        return res.status(200).json({ message: "Desaparecido Actualizado exitosamente", idpublicacion: desaparecido.id});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const desactivarDesaparecido = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        await desaparecidoModel.desactivarDesaparecido(req.params.id);
+        res.status(200).json({ message: "Desaparecido desactivado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const activarDesaparecido = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        await desaparecidoModel.activarDesaparecido(req.params.id);
+        res.status(200).json({ message: "Desaparecido activado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const verificarPublicacion = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        await desaparecidoModel.verificarPublicacion(req.params.id);
+        res.status(200).json({ message: "Desaparecido verificado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 module.exports = {
     createDesaparecido,
     getDesaparecido,
@@ -239,5 +295,10 @@ module.exports = {
     getInfoDesaparecidoByID,
     pruebaLocalidad,
     crearComentarioPublicaciones,
-    getDesaparecidosTableBO
+    getDesaparecidosTableBO,
+    obtenerInformacionEditarPublicacionBO,
+    updateDesaparecidoBO,
+    desactivarDesaparecido,
+    activarDesaparecido,
+    verificarPublicacion
 };
