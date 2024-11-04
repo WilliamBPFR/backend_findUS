@@ -230,7 +230,8 @@ const getInfoDesaparecidoByID = async (id) => {
                             apellido: true,
                             urlfotoperfil: true
                         }
-                    }
+                    },
+                    estado: true
                 },
                 orderBy:{
                     id: 'desc'
@@ -282,12 +283,21 @@ const crearComentarioPublicaciones = async (comentario,user_id) => {
 }
 
 const getDesaparecidosTableBO = async (page,limit, filtros) => {
+    const condiciones = [
+        filtros?.nombreDesaparecido ? {nombredesaparecido : { contains: filtros?.nombreDesaparecido, mode: 'insensitive' }} : null,
+        filtros?.fechaDesde ? {fechadesaparicion : { gte: new Date(filtros?.fechaDesde) }} : null,
+        filtros?.fechaHasta ? {fechadesaparicion : { lte: new Date(filtros?.fechaHasta) }} : null,
+        filtros?.estatus ? {estado : { id: parseInt(filtros?.estatus) }} : null
+    ].filter(condicion => condicion !== null); // Filtra valores `null`
+
+
     const desaparecidos = await prisma.publicacion.findMany({
         select:{
             id: true,
             nombredesaparecido: true,
             fechadesaparicion: true,
             fechacreacion: true,
+            verificado: true,
             estado: {
                 select:{
                     id: true,
@@ -296,12 +306,7 @@ const getDesaparecidosTableBO = async (page,limit, filtros) => {
             }
         },
         where:{
-            nombredesaparecido: filtros?.nombreDesaparecido ? { contains: filtros?.nombreDesaparecido, mode: 'insensitive' } : undefined,
-            fechadesaparicion: {
-                gte: filtros?.fechaDesde ? new Date(filtros?.fechaDesde) : undefined,
-                lte: filtros?.fechaHasta ? new Date(filtros?.fechaHasta) : undefined,
-            },
-            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined
+            AND: condiciones
         },
         orderBy: {
             fechacreacion: 'desc'
@@ -326,8 +331,61 @@ const getDesaparecidosTableBO = async (page,limit, filtros) => {
 }
 
 
+const obtenerInformacionEditarPublicacionBO = async (id) => {
+    const publicacion = await prisma.publicacion.findUnique({
+        where: {
+            id: parseInt(id)
+        },
+        include:{
+            tipodocumento: true,
+            estado: true,
+            fotospublicacion: {
+                select:{
+                    id: true,
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+            },
+        }
+    });
+    return publicacion;
+}
 
-
+const updateDesaparecidoBO = async (id, desaparecido_data) => {
+    const localidad = await getLocalidadUbicacion(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud);
+    try{
+        const desaparecido =  await prisma.publicacion.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                nombredesaparecido: desaparecido_data.nombre_desaparecido,
+                tipodocumento: {
+                    connect: { id: desaparecido_data.id_tipo_documento } // Conectar con el tipo de documento usando su ID
+                },
+                numerodocumentodesaparecido: desaparecido_data.documento_desaparecido,
+                edad: desaparecido_data.edad, // Valor directo (no relación)
+                telefono: desaparecido_data.telefono,
+                fechadesaparicion: desaparecido_data.fecha_desaparicion,
+                descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
+                relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
+                informacioncontacto: desaparecido_data.contacto,
+                ubicacion_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
+                ubicacion_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                localidad_desaparicion: localidad,
+                fechanacimiento: desaparecido_data.fecha_nacimiento,
+                estado: {
+                    connect: { id: desaparecido_data.idestado || 1 } // Conectar con el estado usando su ID, 1 como valor por defecto
+                },
+                fechaactualizacion: new Date(), // Generar la fecha actual
+            },
+        });
+        return { success: true, id: desaparecido.id };
+    }catch(error){
+        console.error('Error al actualizar el desaparecido:', error);
+        return { success: false, error };
+    }
+}
 
 
 
@@ -352,6 +410,50 @@ const deleteDesaparecido = async (id) => {
     });
 }
 
+
+
+
+
+
+const desactivarDesaparecido = async (id) => {
+    return await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            estado: {
+                connect: { id: 2 } // Conectar con el estado usando su ID
+            }
+        },
+    });
+}
+
+
+const activarDesaparecido = async (id) => {
+    return await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            estado: {
+                connect: { id: 1 } // Conectar con el estado usando su ID
+            }
+        },
+    });
+}
+
+const verificarPublicacion = async (id) => {
+    return await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            verificado: true
+        },
+    });
+}
+
+
 // Exportar funciones
 module.exports = {
     crearDesaparecido,
@@ -365,5 +467,10 @@ module.exports = {
     getDesaparecidosByUser,
     getInfoDesaparecidoByID,
     crearComentarioPublicaciones,
-    getDesaparecidosTableBO
+    getDesaparecidosTableBO,
+    obtenerInformacionEditarPublicacionBO,
+    updateDesaparecidoBO,
+    desactivarDesaparecido,
+    activarDesaparecido,
+    verificarPublicacion
 };
