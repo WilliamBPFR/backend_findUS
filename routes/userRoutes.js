@@ -11,6 +11,7 @@ router.get("/user/obtener_info_basica_user", authenticate, userController.getUse
 // Rutas públicas
 router.get('/user/:id', userController.getUserById);
 router.get('/user', userController.getAllUser);
+router.put('/user/admin_update_user/:id', userController.updateAdminAUsuario);
 router.post('/user/registrar_usuario', userController.registrar_usuario);
 router.post('/user/confirmar_correo', userController.confirmar_correo);
 router.post('/user/login', userController.login_usuario);

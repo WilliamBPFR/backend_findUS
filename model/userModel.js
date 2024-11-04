@@ -45,6 +45,22 @@ const getUserById = async (id) => {
     const user = await prisma.usuario.findFirst({
         where: {
             id: parseInt(id)
+        },
+        select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            fechanacimiento: true,
+            numerotelefono: true,
+            urlfotoperfil: true,
+            verificado: true,
+            codigoverificacionusuario: true,
+            idtipodocumento: true,
+            numerodocumento: true,
+            rol: true,
+            estado: true,
+            fechacreacion: true
         }
     });
     return user;
@@ -290,6 +306,19 @@ const cambiarRolUsuario = async (email, idRol) => {
     return user;
 }
 
+const modificarAdminAUsuario = async (id, user_data) => {
+    const user = await prisma.usuario.update({
+        where: {
+            id: id
+        },
+        data: {
+            idrol: user_data.rol,
+            idestado: user_data.estado
+        }
+    });
+    return user;
+}
+
 const getUserInfoForAsyncStorage = async (id) => {
     const user = await prisma.usuario.findFirst({
         where: {
@@ -372,5 +401,6 @@ module.exports = {
     getAllUser,
     getUserInfoForAsyncStorage,
     prueba_refresh_token,
-    getUsuarioTableBO
+    getUsuarioTableBO,
+    modificarAdminAUsuario
 };
