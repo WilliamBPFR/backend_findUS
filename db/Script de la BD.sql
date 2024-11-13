@@ -160,6 +160,20 @@ CREATE TABLE IdiomaAplicacion(
     fechaCreacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE Reporte (
+    id SERIAL PRIMARY KEY,
+    reportes_activos INT NOT NULL DEFAULT 0,
+    nuevos_reportes INT NOT NULL DEFAULT 0,
+    reportes_resueltos INT NOT NULL DEFAULT 0,
+    avistamientos_activos INT NOT NULL DEFAULT 0,
+    total_usuarios_activos INT NOT NULL DEFAULT 0,
+    dia_inicio_conteo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    dia_fin_conteo TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+
 -- Insertar datos en las tablas de catálogo
 INSERT INTO Estado (nombreEstado, tipoEstado) VALUES ('Activo', 'General');
 INSERT INTO Estado (nombreEstado, tipoEstado) VALUES ('Inactivo', 'General');

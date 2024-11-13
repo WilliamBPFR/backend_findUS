@@ -50,7 +50,7 @@ const getAvistamientoPublicacion = async (req, res) => {
     try {
         console.log("Id Publicacion",req.params.idPublicacion);
         const avistamiento = await avistamientoModel.getAvistamientoPublicacion(req.params.idPublicacion);
-        console.log("Avistamiento",avistamiento);
+        // console.log("Avistamiento",avistamiento);
         res.status(200).json(avistamiento);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -117,6 +117,56 @@ const deleteAvistamiento = async (req, res) => {
     }
 };
 
+const activarAvistamiento = async (req, res) => {
+    // #swagger.tags = ['Avistamiento']
+    try {
+        await avistamientoModel.activarAvistamiento(req.params.id);
+        res.status(200).json({ message: "Avistamiento activado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const desactivarAvistamiento = async (req, res) => {
+    // #swagger.tags = ['Avistamiento']
+    try {
+        await avistamientoModel.desactivarAvistamiento(req.params.id);
+        res.status(200).json({ message: "Avistamiento desactivado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+const verificarAvistamiento = async (req, res) => {
+    // #swagger.tags = ['Avistamiento']
+    try {
+        await avistamientoModel.verificarAvistamiento(req.params.id);
+        res.status(200).json({ message: "Avistamiento verificado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+const editarAvistamiento = async (req, res) => {
+    // #swagger.tags = ['Avistamiento']
+    try {
+        if(req.body.imageData){
+            console.log("Datos de la Peticion DE IMAGEDATA",req.body.imageData);
+            console.log("Datos de la Peticion DE ID",req.params.id);
+            const fotoAvistamiento = await avistamientoModel.editarFotoAvistamiento({...req.body.imageData, idavistamiento: req.params.id});
+            if(!fotoAvistamiento.success){
+                return res.status(400).json({ message: "Error al crear la foto del avistamiento"});
+            }
+        }
+        await avistamientoModel.editarAvistamiento(req.params.id, req.body);
+        res.status(200).json({ message: "Avistamiento editado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
 module.exports = {
     crearAvistamiento,
     getAvistamiento,
@@ -124,5 +174,9 @@ module.exports = {
     updateAvistamiento,
     deleteAvistamiento,
     crearFotoAvistamiento,
-    getAvistamientoPublicacion
+    getAvistamientoPublicacion,
+    verificarAvistamiento,
+    activarAvistamiento,
+    desactivarAvistamiento,
+    editarAvistamiento
 };
