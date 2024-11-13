@@ -7,6 +7,11 @@ const {authenticate} = require('../routes/routeAutenthicationService');
 router.post('/user/cambiar_contrasena', authenticate, userController.cambiar_contrasena);
 router.get("/user/verificar_token_valido/", authenticate, userController.verificar_token_valido);
 router.get("/user/obtener_info_basica_user", authenticate, userController.getUserInfoForAsyncStorage);
+router.get("/user/obtener_info_user_perfil/", authenticate, userController.getProfileInfo);
+router.get("/obtener_info_editar_usuario",authenticate, userController.obtenerInfoEditarUsuario);
+router.put("/user/editar_usuario",authenticate, userController.editarUsuario);
+router.put("/user/cambiar_foto_perfil",authenticate, userController.cambiarFotoPerfil);
+router.get("/user/obtener_informaciones_home_bo/",authenticate, userController.informacionesHomeBO);
 
 // Rutas públicas
 router.get('/user/:id', userController.getUserById);
