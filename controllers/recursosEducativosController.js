@@ -1,5 +1,60 @@
 const recursosEducativosModel = require('../model/recursosEducativosModel');
 
+
+const obtenerRecursosEducativosActivos = async (req, res) => {
+    // #swagger.tags = ['Recursos Educativos']
+    try {
+        const recursos = await recursosEducativosModel.obtenerRecursosEducativosActivos(req.params.page, req.params.limit);
+        res.status(200).json(recursos);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const getMaterialEducativoTableBO = async (req,res) => {
+    /* #swagger.tags = ['Recursos Educativos']
+         #swagger.description = 'Endpoint para obtener los Recursos Educativos en formato de tabla.'
+         #swagger.parameters['obj'] = {
+                    in: 'path',
+                    description: 'Número de página y cantidad de registros por página.',
+                    required: true,
+                    schema: {
+                         page: 1,
+                         limit: 10
+                  }
+            }
+    */
+    try{
+        const filtros = req.query;
+        console.log("filtros",filtros);
+        const recursosEducativos = await recursosEducativosModel.getMaterialEducativoTableBO(req.params.page,req.params.limit, filtros);
+        res.status(200).json(recursosEducativos);
+    }catch(error){
+        console.error('Error al obtener los Recursos Educativos:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+const getMaterialEducativoByID = async (req, res) => {
+    // #swagger.tags = ['Recursos Educativos']
+    try {
+        const materialEducativo = await recursosEducativosModel.getMaterialEducativoByID(req.params.id);
+        res.status(200).json(materialEducativo);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+
+
+
+
+
+
+
+
 const obtenerRecursosEducativos = async (req, res) => {
     // #swagger.tags = ['Recursos Educativos']
     try {
@@ -57,7 +112,7 @@ const crearRecursoEducativo = async (req, res) => {
     }
 }
 
-const actualizarRecursoEducativo = async (req, res) => {
+const editarRecursoEducativo = async (req, res) => {
     /* #swagger.tags = ['Recursos Educativos']
        #swagger.description = 'Endpoint para actualizar un recurso educativo.'
        #swagger.parameters['obj'] = {
@@ -75,17 +130,18 @@ const actualizarRecursoEducativo = async (req, res) => {
 
     */
     try {
-        const recurso = await recursosEducativosModel.actualizarRecursoEducativo(req.params.id, req.body);
+        const recurso = await recursosEducativosModel.editarRecursoEducativo(req.params.id, req.body);
         res.status(200).json(recurso);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
 
+
 const desactivarRecursoEducativo = async (req, res) => {
     // #swagger.tags = ['Recursos Educativos']
     try {
-        const recurso = await recursosEducativosModel.eliminarRecursoEducativo(req.params.id);
+        const recurso = await recursosEducativosModel.desactivarRecursoEducativo(req.params.id);
         res.status(200).json(recurso);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -106,7 +162,14 @@ module.exports = {
     obtenerRecursosEducativos,
     obtenerRecursoEducativo,
     crearRecursoEducativo,
-    actualizarRecursoEducativo,
+
+
+    editarRecursoEducativo,
     desactivarRecursoEducativo,
-    activarRecursoEducativo
+    activarRecursoEducativo,
+
+
+    obtenerRecursosEducativosActivos,
+    getMaterialEducativoTableBO,
+    getMaterialEducativoByID
 }

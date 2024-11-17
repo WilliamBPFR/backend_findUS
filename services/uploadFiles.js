@@ -18,6 +18,9 @@ const sanitizeFileName = (fileName) => {
     let sanitized = fileName.replace(/[áéíóúÁÉÍÓÚñÑ]/g, (match) => replaceMap[match]);
     // Reemplaza caracteres no permitidos
     sanitized = sanitized.replace(/[\/\\\?*\:<>"|]/g, "_"); // Reemplaza caracteres no permitidos
+
+    // Reemplaza espacios con _
+    sanitized = sanitized.replace(/ /g, "_");
     return sanitized;
 };
 
@@ -75,9 +78,10 @@ const uploadPhoto = async (fileBase64, fileName, mimeType,carpeta) => {
 // Servicio para subir archivos
 const uploadFile = async (fileBase64, fileName, mimeType,carpeta) => {
     try {
-        const filePath = `${carpeta}/` + new Date().getTime() + fileName ;
+        let filename = sanitizeFileName(fileName);
+
+        const filePath = `${carpeta}/` + new Date().getTime() + filename ;
         // Sanear el nombre del archivo
-        fileName = sanitizeFileName(fileName);
         // Convertir base64 a ArrayBuffer
         const fileData = decode(fileBase64);
 

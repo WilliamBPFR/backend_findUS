@@ -72,6 +72,45 @@ const getAllDesaparecidos = async () => {
     return await prisma.publicacion.findMany();
 }
 
+// obtener todos los desparecidos de un usuario
+const getDesaparecidosByUser = async (id) => {
+    console.log("ID del usuario: ", id);
+    try {
+        return await prisma.publicacion.findMany({
+            where: {
+                idusuario: parseInt(id)
+            },
+            select:{
+                id: true,
+                nombredesaparecido: true,
+                fechadesaparicion: true,
+                estado: {
+                    select:{
+                        id: true,
+                        nombreestado: true
+                    }
+                },
+                verificado: true,
+                fotospublicacion: {
+                    select:{
+                        urlarchivo: true,
+                        idtipofotopublicacion: true
+                    },
+                    where:{
+                        idtipofotopublicacion: 1
+                    }
+                }
+            },
+            orderBy:{
+                fechacreacion: 'desc'
+            }
+        });
+    } catch (error) {
+        console.error('Error al obtener los desaparecidos del usuario:', error);
+        return { success: false, error };
+    }
+}
+
 const getCantidadDesaparecidosActivos = async () => {
     return await prisma.publicacion.count({
         where: {
@@ -191,7 +230,8 @@ const getInfoDesaparecidoByID = async (id) => {
                             apellido: true,
                             urlfotoperfil: true
                         }
-                    }
+                    },
+                    estado: true
                 },
                 orderBy:{
                     id: 'desc'
@@ -216,6 +256,141 @@ const getInfoDesaparecidoByID = async (id) => {
 }
 
 
+const crearComentarioPublicaciones = async (comentario,user_id) => {
+    try{
+        const comentarioCreado = await prisma.comentario.create({
+            data:{
+              fechacreacion: new Date(),
+              idpublicacion: parseInt(comentario.idpublicacion),
+              texto: comentario.texto,
+              idusuario: parseInt(user_id)
+            },
+            include:{
+                usuario:{
+                    select:{
+                        nombre: true,
+                        apellido: true,
+                        urlfotoperfil: true
+                    }
+                }
+            }
+        });
+        return {success: true, comentario: comentarioCreado};
+    }catch(error){
+        console.error('Error al crear el comentario:', error);
+        return {success: false, error};
+    }
+}
+
+const getDesaparecidosTableBO = async (page,limit, filtros) => {
+    const condiciones = [
+        filtros?.nombreDesaparecido ? {nombredesaparecido : { contains: filtros?.nombreDesaparecido, mode: 'insensitive' }} : null,
+        filtros?.fechaDesde ? {fechadesaparicion : { gte: new Date(filtros?.fechaDesde) }} : null,
+        filtros?.fechaHasta ? {fechadesaparicion : { lte: new Date(filtros?.fechaHasta) }} : null,
+        filtros?.estatus ? {estado : { id: parseInt(filtros?.estatus) }} : null
+    ].filter(condicion => condicion !== null); // Filtra valores `null`
+
+
+    const desaparecidos = await prisma.publicacion.findMany({
+        select:{
+            id: true,
+            nombredesaparecido: true,
+            fechadesaparicion: true,
+            fechacreacion: true,
+            verificado: true,
+            estado: {
+                select:{
+                    id: true,
+                    nombreestado: true
+                }
+            }
+        },
+        where:{
+            AND: condiciones
+        },
+        orderBy: {
+            fechacreacion: 'desc'
+        },
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        take: parseInt(limit)
+    });
+
+    const desaparecidosCount = await prisma.publicacion.count({
+        where:{
+            nombredesaparecido: filtros?.nombreDesaparecido ? { contains: filtros?.nombreDesaparecido, mode: 'insensitive' } : undefined,
+            fechadesaparicion: {
+                gte: filtros?.fechaDesde ? new Date(filtros?.fechaDesde) : undefined,
+                lte: filtros?.fechaHasta ? new Date(filtros?.fechaHasta) : undefined,
+            },
+            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined
+        },
+    });
+
+    return {publicaciones: desaparecidos, totalPublicaciones: desaparecidosCount};
+
+}
+
+
+const obtenerInformacionEditarPublicacionBO = async (id) => {
+    const publicacion = await prisma.publicacion.findUnique({
+        where: {
+            id: parseInt(id)
+        },
+        include:{
+            tipodocumento: true,
+            estado: true,
+            fotospublicacion: {
+                select:{
+                    id: true,
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+            },
+        }
+    });
+    return publicacion;
+}
+
+const updateDesaparecidoBO = async (id, desaparecido_data) => {
+    const localidad = await getLocalidadUbicacion(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud);
+    try{
+        const desaparecido =  await prisma.publicacion.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                nombredesaparecido: desaparecido_data.nombre_desaparecido,
+                tipodocumento: {
+                    connect: { id: desaparecido_data.id_tipo_documento } // Conectar con el tipo de documento usando su ID
+                },
+                numerodocumentodesaparecido: desaparecido_data.documento_desaparecido,
+                edad: desaparecido_data.edad, // Valor directo (no relación)
+                telefono: desaparecido_data.telefono,
+                fechadesaparicion: desaparecido_data.fecha_desaparicion,
+                descripcionpersonadesaparecido: desaparecido_data.descripcion_desaparecido,
+                relacionusuariocondesaparecido: desaparecido_data.relacion_desaparecido,
+                informacioncontacto: desaparecido_data.contacto,
+                ubicacion_desaparicion_latitud: desaparecido_data.ubicacion_latitud,
+                ubicacion_desaparicion_longitud: desaparecido_data.ubicacion_longitud,
+                localidad_desaparicion: localidad,
+                fechanacimiento: desaparecido_data.fecha_nacimiento,
+                estado: {
+                    connect: { id: desaparecido_data.idestado || 1 } // Conectar con el estado usando su ID, 1 como valor por defecto
+                },
+                fechaactualizacion: new Date(), // Generar la fecha actual
+            },
+        });
+        return { success: true, id: desaparecido.id };
+    }catch(error){
+        console.error('Error al actualizar el desaparecido:', error);
+        return { success: false, error };
+    }
+}
+
+
+
+
+
 // Actualizar un desaparecido por ID
 const updateDesaparecido = async (id, data) => {
     return await prisma.publicacion.update({
@@ -235,6 +410,50 @@ const deleteDesaparecido = async (id) => {
     });
 }
 
+
+
+
+
+
+const desactivarDesaparecido = async (id) => {
+    return await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            estado: {
+                connect: { id: 2 } // Conectar con el estado usando su ID
+            }
+        },
+    });
+}
+
+
+const activarDesaparecido = async (id) => {
+    return await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            estado: {
+                connect: { id: 1 } // Conectar con el estado usando su ID
+            }
+        },
+    });
+}
+
+const verificarPublicacion = async (id) => {
+    return await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            verificado: true
+        },
+    });
+}
+
+
 // Exportar funciones
 module.exports = {
     crearDesaparecido,
@@ -245,5 +464,13 @@ module.exports = {
     deleteDesaparecido,
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
-    getInfoDesaparecidoByID
+    getDesaparecidosByUser,
+    getInfoDesaparecidoByID,
+    crearComentarioPublicaciones,
+    getDesaparecidosTableBO,
+    obtenerInformacionEditarPublicacionBO,
+    updateDesaparecidoBO,
+    desactivarDesaparecido,
+    activarDesaparecido,
+    verificarPublicacion
 };

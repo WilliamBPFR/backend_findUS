@@ -1,6 +1,7 @@
 const { PrismaClient,  } = require('@prisma/client')
 const encryptService = require('../services/encryptService');
 const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
+const { uploadFile } = require('../services/uploadFiles');
 const e = require('express');
 
 const prisma = new PrismaClient()
@@ -45,6 +46,22 @@ const getUserById = async (id) => {
     const user = await prisma.usuario.findFirst({
         where: {
             id: parseInt(id)
+        },
+        select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            fechanacimiento: true,
+            numerotelefono: true,
+            urlfotoperfil: true,
+            verificado: true,
+            codigoverificacionusuario: true,
+            idtipodocumento: true,
+            numerodocumento: true,
+            rol: true,
+            estado: true,
+            fechacreacion: true
         }
     });
     return user;
@@ -61,6 +78,7 @@ const usuarioExistnente = async (email, documentoIdentidad) => {
             email: email
         }
     })
+
     const usuario_existente_documento = await prisma.usuario.findFirst({
         where: {
             numerodocumento: documentoIdentidad
@@ -290,13 +308,327 @@ const cambiarRolUsuario = async (email, idRol) => {
     return user;
 }
 
-const getUserProfilePicture = async (id) => {
+const modificarAdminAUsuario = async (id, user_data) => {
+    const user = await prisma.usuario.update({
+        where: {
+            id: id
+        },
+        data: {
+            idrol: user_data.rol,
+            idestado: user_data.estado
+        }
+    });
+    return user;
+}
+
+const getUserInfoForAsyncStorage = async (id) => {
     const user = await prisma.usuario.findFirst({
         where: {
             id: id
         }
     });
-    return user.urlfotoperfil;
+    return {
+        nombreUsuario: user.nombre + " " + user.apellido,
+        urlFotoPerfil: user.urlfotoperfil,
+        idRol: user.idrol
+    };
+}
+
+const prueba_refresh_token = async (token) => {
+    console.log('Prueba Refresh Token:', token);
+    const {data,error} = await supabaseAnon.auth.refreshSession({refresh_token: token});
+    if(error){
+        console.error('Error en la verificación del correo:', error);
+        return { autenticado: false, message: error.message };
+    }
+
+    if(data){
+        return {autenticado: true, message: "Usuario autenticado", token: data};
+    }
+}
+
+const getUsuarioTableBO = async (page, limit, filtros) => {
+    // Construir el array de condiciones, excluyendo cualquier condición que sea `undefined`
+    const condiciones = [
+        filtros?.nombreCompleto ? {
+            OR: [
+                { nombre: { contains: filtros.nombreCompleto, mode: 'insensitive' } },
+                { apellido: { contains: filtros.nombreCompleto, mode: 'insensitive' } }
+            ]
+        } : null,
+        filtros?.rol ? { rol: { id: parseInt(filtros.rol) } } : null,
+        filtros?.estatus ? { estado: { id: parseInt(filtros.estatus) } } : null
+    ].filter(condicion => condicion !== null); // Filtra valores `null`
+
+    const usuarios = await prisma.usuario.findMany({
+        select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            rol: true,
+            estado: true,
+            fechacreacion: true,
+            verificado: true
+        },
+        where: {
+            AND: condiciones
+        },
+        orderBy: {
+            fechacreacion: 'desc'
+        },
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        take: parseInt(limit)
+    });
+
+    const usuariosCount = await prisma.usuario.count({
+        where:{
+            nombre: filtros?.nombre ? { contains: filtros.nombre, mode: 'insensitive' } : undefined,
+            rol: filtros?.rol? { id: parseInt(filtros?.rol) } : undefined,
+        }
+    });
+    return {usuarios, usuariosCount};
+}
+
+const getProfileInfo = async (userId) => {
+    return prisma.usuario.findUnique({
+        where: {
+            id: userId
+        },
+        select: {
+            id: true,
+            nombre: true,
+            apellido: true,
+            email: true,
+            tipodocumento: true,
+            numerodocumento: true,
+            numerotelefono: true,
+            rol: true,
+            fechanacimiento: true,
+            urlfotoperfil: true,
+            estado: true,
+            fechacreacion: true
+        }
+    });
+}
+
+const getEstadisticasPublicaciones = async (userId) => {
+    const totalPublicacionesHechas = await prisma.publicacion.count({
+        where: {
+            idusuario: userId
+        }
+    });
+
+    const totalPublicacionesActivas = await prisma.publicacion.count({
+        where: {
+            idusuario: userId,
+            idestado: 1
+        }
+    });
+
+    const totalPublicacionesInactivas = await prisma.publicacion.count({
+        where: {
+            idusuario: userId,
+            idestado: 2
+        }
+    });
+
+    const totalAvistamientosPublicados = await prisma.avistamiento.count({
+        where: {
+            idusuario: userId
+        }
+    });
+
+    const totalComentariosHechos = await prisma.comentario.count({
+        where: {
+            idusuario: userId
+        }
+    });
+
+    return {
+        totalPublicacionesHechas,
+        totalPublicacionesActivas,
+        totalPublicacionesInactivas,
+        totalAvistamientosPublicados,
+        totalComentariosHechos
+    };
+}
+
+const obtenerInfoEditarUsuario = async (id) => {
+    const user = await prisma.usuario.findFirst({
+        where: {
+            id: id
+        },
+        select: {
+            nombre: true,
+            apellido: true,
+            fechanacimiento: true,
+            numerotelefono: true,
+            idtipodocumento: true,
+            numerodocumento: true,
+        }
+    });
+    return user;
+}
+
+const editarUsuario = async (id, user_data) => {
+
+    const usuario_existente_document = await prisma.usuario.findFirst({
+        where: {
+            numerodocumento: user_data.numero_documento
+        }
+    })
+
+    if(usuario_existente_document && usuario_existente_document.id != id){
+        return {message: `El documento: ${user_data.numero_documento} está en uso`, existe: true, success: false};
+    }
+
+    const user = await prisma.usuario.update({
+        where: {
+            id: id
+        },
+        data: {
+            nombre: user_data.nombres,
+            apellido: user_data.apellidos,
+            fechanacimiento: new Date(user_data.fechaNacimiento),
+            numerotelefono: user_data.numeroTelefono,
+            idtipodocumento: user_data.IdTipoDocumento,
+            numerodocumento: user_data.numero_documento,
+        }
+    });
+
+    console.log("MI LOCO USUARIOOOOOO: ",user);
+    return {success: true, existe: false, message: "Usuario actualizado con éxito"};
+}
+
+const cambiarImagenPerfil = async (id, imageData) => {
+    const { signedUrl, success, error } = await uploadFile(
+        imageData.base64File,
+        imageData.fileName,
+        imageData.mimeType,
+        "Fotos de perfil"
+    );
+
+    if (!success) {
+        throw new Error(`Error subiendo el archivo: ${error.message}`);
+    }
+
+    const user = await prisma.usuario.update({
+        where: {
+            id: id
+        },
+        data: {
+            urlfotoperfil: signedUrl
+        }
+    });
+
+    return { success: true, message: "Imagen de perfil actualizada con éxito", urlFotoPerfil: signedUrl };
+}
+
+const informacionesHomeBO = async () => {
+
+    const today = new Date();
+
+    // Calcula el día de la semana (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
+    const dayOfWeek = today.getDay();
+
+    // Encuentra el último lunes ajustando la fecha actual hacia atrás
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - ((dayOfWeek + 6) % 7)); // Ajusta al lunes más cercano
+
+    // Resetea la hora para obtener el inicio del lunes (00:00:00)
+    startOfWeek.setHours(0, 0, 0, 0);
+
+
+
+    const publicaciones_activas = await prisma.publicacion.count({
+        where: {
+            idestado: 1
+        }
+    });
+
+    // Publicaones hehcas de en la semana actual
+    const publicaciones_semana = await prisma.publicacion.count({
+        where: {
+            fechacreacion: {
+                gte: startOfWeek,
+                lte: today
+            }
+        }
+    });
+
+    // Avistamientos hechos en la semana actual
+    const avistamientos_semana = await prisma.avistamiento.count({
+        where: {
+            fechacreacion: {
+                gte: startOfWeek,
+                lte: today
+            }
+        }
+    });
+
+    const total_usuarios_activos = await prisma.usuario.count({
+        where: {
+            idestado: 1
+        }
+    });
+
+
+
+    //Informaciones de la Semana Pasada
+    const informacion_semana_pasada = await prisma.reporte.findFirst({
+        where: {
+           activo: true,
+        }
+    });
+
+    const informaciones_semana_actual = {
+        publicaciones_activas,
+        publicaciones_semana,
+        avistamientos_semana,
+        total_usuarios_activos
+    };
+
+    const cantidad_total_usuarios = await prisma.usuario.count();
+
+    const cantidad_usuarios_por_rol = await prisma.rol.findMany({
+        select: {
+            id: true,
+            nombrerol: true,
+            _count: {
+                select: {
+                    usuario: true
+                }
+            }
+        }
+    });
+
+    const infornacion_grafico_usuarios = {
+        cantidad_total_usuarios,
+        cantidad_usuarios_por_rol
+    };
+
+    const cantidad_total_materiales_educativos = await prisma.recursoeducativo.count();
+
+    const cantidad_materiales_educativos_por_tipo = await prisma.categoriamaterial.findMany({
+        select: {
+            id: true,
+            nombrecategoriamaterial: true,
+            _count: {
+                select: {
+                    recursoeducativo: true
+                }
+            }
+        }
+    });
+
+    const informacion_grafico_materiales_educativos = {
+        cantidad_total_materiales_educativos,
+        cantidad_materiales_educativos_por_tipo
+    };
+
+    return {informaciones_semana_actual, informacion_semana_pasada, infornacion_grafico_usuarios, informacion_grafico_materiales_educativos};
+
 }
 
 
@@ -312,5 +644,14 @@ module.exports = {
     verificarUsuario,
     getUserById,
     getAllUser,
-    getUserProfilePicture
+    getUserInfoForAsyncStorage,
+    prueba_refresh_token,
+    getUsuarioTableBO,
+    modificarAdminAUsuario,
+    getProfileInfo,
+    getEstadisticasPublicaciones,
+    obtenerInfoEditarUsuario,
+    editarUsuario,
+    cambiarImagenPerfil,
+    informacionesHomeBO
 };
