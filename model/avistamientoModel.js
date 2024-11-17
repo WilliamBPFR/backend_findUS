@@ -24,6 +24,31 @@ const crearAvistamiento = async (avistamiento_data,id_usuario) => {
     return avistamiento;
 }
 
+const getAvistamientoPublicacion = async (idPublicacion) => {
+    return await prisma.avistamiento.findMany({
+        include: {
+            fotosavistamiento:{
+                select: {
+                    urlarchivo: true,
+                }
+            },
+            usuario:{
+                select:{
+                    nombre: true,
+                    apellido: true,
+                    urlfotoperfil: true
+                }
+            }, estado: true
+        },
+        where: {
+            idpublicacion: parseInt(idPublicacion),
+        },
+        orderBy:{
+            id: 'desc'
+        }
+    });
+}
+
 const crearFotoAvistamiento = async (foto_data) => {
     try{
         const { signedUrl, success, error } = await uploadFile(
@@ -40,8 +65,64 @@ const crearFotoAvistamiento = async (foto_data) => {
         const nuevaFotoAvistamiento = await prisma.fotosavistamiento.create({
             data: {
                 urlarchivo: signedUrl, // Usamos la URL generada (firmada)
-                idavistamiento: foto_data.idavistamiento || null,
+                idavistamiento: parseInt(foto_data.idavistamiento) || null,
                 fechacreacion: new Date(),
+            },
+        });
+
+        console.log('Foto subida:', nuevaFotoAvistamiento);
+        return {
+            success: true,
+            message: 'Foto y/o archivo subido(s) correctamente.',
+        };
+        
+    } catch (error) {
+        console.error('Error creando foto publicacion:', error.message);
+        return {
+            success: false,
+            message: error.message,
+        };
+    }
+}
+
+
+
+const editarFotoAvistamiento = async (foto_data) => {
+    try{
+        const { signedUrl, success, error } = await uploadFile(
+            foto_data.base64File,
+            foto_data.fileName,
+            foto_data.mimeType,
+            "Fotos Avistamientos"
+        );
+        if (!success) {
+            throw new Error(`Error subiendo la imagen: ${error.message}`);
+        }
+        const foto = await prisma.fotosavistamiento.findFirst({
+            select: {
+                id: true,
+            },
+            where: {
+                idavistamiento: parseInt(foto_data.idavistamiento),
+            }
+        });
+
+        if (foto == null) {
+            console.log('No se encontró la foto con el id proporcionado.');
+            console.log('ID:', foto);
+            return {
+                success: false,
+                message: 'No se encontró la foto con el id proporcionado.',
+            };
+        }
+        // Creando el registro en la tabla fotospublicacion con la URL de la imagen
+        const nuevaFotoAvistamiento = await prisma.fotosavistamiento.update({
+            where: {
+                id: parseInt(foto.id),
+            },
+            data: {
+                urlarchivo: signedUrl, // Usamos la URL generada (firmada)
+                fecha_modificacion: new Date(),
             },
         });
 
@@ -114,6 +195,54 @@ const deleteAvistamiento = async (id) => {
     });
 }
 
+const verificarAvistamiento = async (id) => {
+    return await prisma.avistamiento.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            verificado: true,
+        }
+    });
+}
+
+const activarAvistamiento = async (id) => {
+    return await prisma.avistamiento.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            idestatus: 1,
+        }
+    });
+}
+
+const desactivarAvistamiento = async (id) => {
+    return await prisma.avistamiento.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            idestatus: 2,
+        }
+    });
+}
+
+const editarAvistamiento = async (id, data) => {
+    return await prisma.avistamiento.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            fechahora: new Date(data.fecha_avistamiento),
+            detalles: data.detalles,
+            fecha_modificacion: new Date(),
+            ubicacion_desaparicion_latitud: data.ubicacion_latitud,
+            ubicacion_desaparicion_longitud: data.ubicacion_longitud,
+        }
+    });
+}
+
 module.exports = {
     crearAvistamiento,
     avistamientoExistente,
@@ -121,5 +250,11 @@ module.exports = {
     getAllAvistamientos,
     updateAvistamiento,
     deleteAvistamiento,
-    crearFotoAvistamiento
+    crearFotoAvistamiento,
+    getAvistamientoPublicacion,
+    verificarAvistamiento,
+    activarAvistamiento,
+    desactivarAvistamiento,
+    editarAvistamiento,
+    editarFotoAvistamiento
 };
