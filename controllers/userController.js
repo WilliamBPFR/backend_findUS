@@ -312,6 +312,65 @@ const getUsuariosTableBO = async (req, res) => {
     }
 };
 
+const getProfileInfo = async (req, res) => {
+    // #swagger.tags = ['User']
+    try {
+        const profileInfo = await userModel.getProfileInfo(parseInt(req.user.id_user));
+        const estadisticasPublicaciones = await userModel.getEstadisticasPublicaciones(parseInt(req.user.id_user));
+        res.status(200).json({informacionesPerfil: profileInfo, estadisticasPublicaciones: estadisticasPublicaciones});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const obtenerInfoEditarUsuario = async (req, res) => {
+    try {
+        const usuario = await userModel.obtenerInfoEditarUsuario(req.user.id_user);
+        return res.status(200).json(usuario);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+const editarUsuario = async (req, res) => {
+    try {
+        console.log("EDITAR USUARIO");
+        console.log(req.body);
+        const usuario = await userModel.editarUsuario(parseInt(req.user.id_user), req.body);
+        if(!usuario.success){
+            return res.status(400).json({ message: usuario.message});
+        }
+        return res.status(200).json({ message: "Usuario modificado correctamente"});	
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+const cambiarFotoPerfil = async (req, res) => {
+    try {
+        const usuario = await userModel.cambiarImagenPerfil(parseInt(req.user.id_user), req.body);
+        if(!usuario.success){
+            return res.status(400).json({ message: usuario.message});
+        }
+        return res.status(200).json({ message: usuario.message, urlFotoPerfil: usuario.urlFotoPerfil});
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+const informacionesHomeBO = async (req, res) => {
+    // #swagger.tags = ['User']
+    try {
+        const informaciones = await userModel.informacionesHomeBO();
+        res.status(200).json(informaciones);
+    } catch (error) {
+        console.error('Error al obtener las informaciones:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
 module.exports = {
     registrar_usuario,
     confirmar_correo,
@@ -327,5 +386,10 @@ module.exports = {
     getUserInfoForAsyncStorage,
     prueba_refresh_token,
     getUsuariosTableBO,
-    updateAdminAUsuario
+    updateAdminAUsuario,
+    getProfileInfo,
+    obtenerInfoEditarUsuario,
+    editarUsuario,
+    cambiarFotoPerfil,
+    informacionesHomeBO
 };
