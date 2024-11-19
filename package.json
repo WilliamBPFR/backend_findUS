@@ -25,7 +25,7 @@
     "expo-constants": "^16.0.2",
     "expo-device": "^6.0.2",
     "expo-notifications": "^0.28.19",
-    "express": "^4.19.2",
+    "express": "^4.21.1",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.14",
     "swagger-jsdoc": "^6.2.8",

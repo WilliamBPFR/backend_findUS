@@ -1,5 +1,5 @@
 const swaggerAutogen = require('swagger-autogen')();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const doc = {
   info: {
     title: 'FindUS API',
