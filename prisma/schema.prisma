@@ -190,6 +190,7 @@ model usuario {
   comentario                comentario[]
   publicacion               publicacion[]
   recursoeducativo          recursoeducativo[]
+  ubicacion_usuario         ubicacion_usuario[]
   estado                    estado?             @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
   rol                       rol?                @relation(fields: [idrol], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tipodocumento             tipodocumento?      @relation(fields: [idtipodocumento], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -206,4 +207,14 @@ model reporte {
   dia_inicio_conteo      DateTime? @default(now()) @db.Timestamp(6)
   dia_fin_conteo         DateTime? @default(now()) @db.Timestamp(6)
   activo                 Boolean?  @default(true)
+}
+
+model ubicacion_usuario {
+  id                     Int       @id @default(autoincrement())
+  idusuario              Int?
+  ubicacion_latitud      String?   @db.VarChar(255)
+  ubicacion_longitud     String?   @db.VarChar(255)
+  fechahoraactualizacion DateTime? @db.Timestamp(6)
+  fechacreacion          DateTime? @default(now()) @db.Timestamp(6)
+  usuario                usuario?  @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
