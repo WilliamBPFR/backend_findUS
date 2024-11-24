@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 
 // Endpoint de health check
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'UP', message: 'API ARRIBAAAAA - Version 1.0.0' });
+    res.status(200).json({ status: 'UP', message: 'API ARRIBAAAAA - Version 2.0.0 - 24/11/2024' });
 });
 
 
