@@ -12,6 +12,7 @@ router.get("/obtener_info_editar_usuario",authenticate, userController.obtenerIn
 router.put("/user/editar_usuario",authenticate, userController.editarUsuario);
 router.put("/user/cambiar_foto_perfil",authenticate, userController.cambiarFotoPerfil);
 router.get("/user/obtener_informaciones_home_bo/",authenticate, userController.informacionesHomeBO);
+router.post("/user/actualizar_ubicacion_usuario",authenticate, userController.guardarUbicacionRTUsuario);
 
 // Rutas públicas
 router.get('/user/:id', userController.getUserById);

@@ -631,6 +631,38 @@ const informacionesHomeBO = async () => {
 
 }
 
+const guardarUbicacionRTUsuario = async (id, ubicacion) => {
+    const usuario_ubicacion = await prisma.ubicacion_usuario.findFirst({
+        where: {
+            idusuario: id
+        }
+    });
+
+    if(usuario_ubicacion){
+        await prisma.ubicacion_usuario.update({
+            where: {
+                id: usuario_ubicacion.id
+            },
+            data: {
+                latitud: ubicacion.latitud,
+                longitud: ubicacion.longitud,
+                fechahoraactualizacion: new Date()
+            }
+        });
+    }else{
+        await prisma.ubicacion_usuario.create({
+            data: {
+                idusuario: id,
+                latitud: ubicacion.latitud,
+                longitud: ubicacion.longitud
+            }
+        });
+    }
+
+    return {success: true, message: "Ubicación actualizada con éxito"};
+}
+
+
 
 module.exports = {
     crearUsuario,
@@ -653,5 +685,6 @@ module.exports = {
     obtenerInfoEditarUsuario,
     editarUsuario,
     cambiarImagenPerfil,
-    informacionesHomeBO
+    informacionesHomeBO,
+    guardarUbicacionRTUsuario
 };
