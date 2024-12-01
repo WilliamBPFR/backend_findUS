@@ -184,6 +184,7 @@ model usuario {
   idrol                     Int?
   idestado                  Int?
   fechacreacion             DateTime?           @default(now()) @db.Timestamp(6)
+  id_notificacion_expo      String?
   avistamiento              avistamiento[]
   cambiarcontrasena         cambiarcontrasena[]
   chatpublicacion           chatpublicacion[]
