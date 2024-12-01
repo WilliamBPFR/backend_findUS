@@ -644,17 +644,21 @@ const guardarUbicacionRTUsuario = async (id, ubicacion) => {
                 id: usuario_ubicacion.id
             },
             data: {
-                latitud: ubicacion.latitud,
-                longitud: ubicacion.longitud,
+                ubicacion_latitud: ubicacion.latitud.toString(),
+                ubicacion_longitud: ubicacion.longitud.toString(),
                 fechahoraactualizacion: new Date()
             }
         });
     }else{
         await prisma.ubicacion_usuario.create({
             data: {
-                idusuario: id,
-                latitud: ubicacion.latitud,
-                longitud: ubicacion.longitud
+                usuario: {
+                    connect: {
+                        id: id
+                    }
+                },
+                ubicacion_latitud: ubicacion.latitud.toString(),
+                ubicacion_longitud: ubicacion.longitud.toString()
             }
         });
     }
