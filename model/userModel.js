@@ -270,7 +270,7 @@ const loginUsuario = async (email, contrasena) => {
             return {autenticado: true, message: "Usuario autenticado", token: data?.session.access_token};
         }
     }else{
-        return {message: "Usuario no verificado", autenticado: false};
+        return {message: "Usuario no verificado", autenticado: false, id: usuario.id};
     }
 }
 
@@ -662,7 +662,18 @@ const guardarUbicacionRTUsuario = async (id, ubicacion) => {
     return {success: true, message: "Ubicación actualizada con éxito"};
 }
 
+const guardarIDNotificacionUsuario = async (id, idNotificacion) => {
+    const usuario = await prisma.usuario.update({
+        where: {
+            id: id
+        },
+        data: {
+            id_notificacion_expo: idNotificacion
+        }
+    });
 
+    return {success: true, message: "ID de notificación actualizado con éxito"};
+}
 
 module.exports = {
     crearUsuario,
@@ -686,5 +697,6 @@ module.exports = {
     editarUsuario,
     cambiarImagenPerfil,
     informacionesHomeBO,
-    guardarUbicacionRTUsuario
+    guardarUbicacionRTUsuario,
+    guardarIDNotificacionUsuario
 };

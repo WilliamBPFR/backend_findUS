@@ -188,7 +188,7 @@ const login_usuario = async (req, res) => {
         const usuario = await userModel.loginUsuario(req.body.email, req.body.contrasena);
         if(usuario.autenticado){
             console.log(usuario);
-            return res.status(200).json({ message: "Usuario logueado correctamente", token: usuario.token, autenticado: true, });
+            return res.status(200).json({ message: "Usuario logueado correctamente", token: usuario.token, autenticado: true, id_usuario: usuario.id });
         }else{
             return res.status(400).json({ message: "Correo o Contraseña incorrecta. Revise e intente de nuevo"  }); //usuario.message.includes("Invalid login credentials") ? "Contraseña o Correo" : usuario.message
         }
@@ -382,6 +382,19 @@ const guardarUbicacionRTUsuario = async (req, res) => {
     }
 }
 
+const guardarIDNotificacionUsuario = async (req, res) => {
+    try {
+        const usuario = await userModel.guardarIDNotificacionUsuario(parseInt(req.user.id_user), req.body.idNotificacion);
+        if(!usuario.success){
+            return res.status(400).json({ message: usuario.message});
+        }
+        return res.status(200).json({ message: "ID de notificación guardado correctamente"});	
+    } catch (error) {
+        console.log("ERROR", error);
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     registrar_usuario,
     confirmar_correo,
@@ -403,5 +416,6 @@ module.exports = {
     editarUsuario,
     cambiarFotoPerfil,
     informacionesHomeBO,
-    guardarUbicacionRTUsuario   
+    guardarUbicacionRTUsuario,
+    guardarIDNotificacionUsuario
 };
