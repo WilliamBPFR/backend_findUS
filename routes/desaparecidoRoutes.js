@@ -26,5 +26,6 @@ router.put('/desaparecido/actualizarDesaparecidoBO/:id', desaparecidoController.
 router.put('/desaparecido/activarPublicacion/:id', desaparecidoController.activarDesaparecido);
 router.put('/desaparecido/desactivarPublicacion/:id', desaparecidoController.desactivarDesaparecido);
 router.put('/desaparecido/verificarPublicacion/:id', desaparecidoController.verificarPublicacion);
+router.put('/desaparecido/cerrarPublicacion/:id', desaparecidoController.cerrarDesaparecido);
 
 module.exports = router;
