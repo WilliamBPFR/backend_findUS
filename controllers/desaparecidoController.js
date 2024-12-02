@@ -274,7 +274,7 @@ const activarDesaparecido = async (req, res) => {
     }
 }
 
-const CerrarDesaparecido = async (req, res) => {
+const cerrarDesaparecido = async (req, res) => {
     // #swagger.tags = ['Desaparecido']
     try {
         await desaparecidoModel.CerrarDesaparecido(req.params.id);
@@ -310,5 +310,6 @@ module.exports = {
     updateDesaparecidoBO,
     desactivarDesaparecido,
     activarDesaparecido,
-    verificarPublicacion
+    verificarPublicacion,
+    cerrarDesaparecido
 };
