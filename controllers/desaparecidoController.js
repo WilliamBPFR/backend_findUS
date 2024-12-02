@@ -274,6 +274,16 @@ const activarDesaparecido = async (req, res) => {
     }
 }
 
+const CerrarDesaparecido = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        await desaparecidoModel.CerrarDesaparecido(req.params.id);
+        res.status(200).json({ message: "Desaparecido cerrado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 const verificarPublicacion = async (req, res) => {
     // #swagger.tags = ['Desaparecido']
     try {

@@ -83,7 +83,21 @@ const getDesaparecidosByUser = async (id) => {
             select:{
                 id: true,
                 nombredesaparecido: true,
+                tipodocumento: {
+                    select:{
+                        id: true,
+                        nombretipodocumento: true
+                    }
+                },
+                numerodocumentodesaparecido: true,
+                telefono: true,
                 fechadesaparicion: true,
+                descripcionpersonadesaparecido: true,
+                relacionusuariocondesaparecido: true,
+                informacioncontacto: true,
+                ubicacion_desaparicion_latitud: true,
+                ubicacion_desaparicion_longitud: true,
+                fechanacimiento: true,
                 estado: {
                     select:{
                         id: true,
@@ -393,12 +407,40 @@ const updateDesaparecidoBO = async (id, desaparecido_data) => {
 
 // Actualizar un desaparecido por ID
 const updateDesaparecido = async (id, data) => {
-    return await prisma.publicacion.update({
-        where: {
-            id: parseInt(id),
-        },
-        data: data,
-    });
+    const localidad = await getLocalidadUbicacion(data.ubicacion_latitud,data.ubicacion_longitud)
+    try{
+        const desaparecido = await prisma.publicacion.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                nombredesaparecido: data.nombre_desaparecido,
+                tipodocumento: {
+                    connect: { id: data.id_tipo_documento } // Conectar con el tipo de documento usando su ID
+                },
+                numerodocumentodesaparecido: data.documento_desaparecido,
+                edad: data.edad, // Valor directo (no relación)
+                telefono: data.telefono,
+                fechadesaparicion: data.fecha_desaparicion,
+                descripcionpersonadesaparecido: data.descripcion_desaparecido,
+                relacionusuariocondesaparecido: data.relacion_desaparecido,
+                informacioncontacto: data.contacto,
+                ubicacion_desaparicion_latitud: data.ubicacion_latitud,
+                ubicacion_desaparicion_longitud: data.ubicacion_longitud,
+                localidad_desaparicion: localidad,
+                verificado: false,
+                fechanacimiento: data.fecha_nacimiento,
+                estado: {
+                    connect: { id: data.idestado || 1 } // Conectar con el estado usando su ID, 1 como valor por defecto
+                },
+                fechaactualizacion: new Date(), // Generar la fecha actual
+            },
+        });
+        return { success: true, id: desaparecido.id };
+    } catch (error) {
+        console.error('Error al actualizar el desaparecido:', error);
+        return { success: false, error };
+    }
 }
 
 // Eliminar un desaparecido por ID
@@ -442,6 +484,19 @@ const activarDesaparecido = async (id) => {
     });
 }
 
+const CerrarDesaparecido = async (id) => {
+    return await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            estado: {
+                connect: { id: 4 } // Conectar con el estado usando su ID
+            }
+        },
+    });
+}
+
 const verificarPublicacion = async (id) => {
     return await prisma.publicacion.update({
         where: {
@@ -472,5 +527,6 @@ module.exports = {
     updateDesaparecidoBO,
     desactivarDesaparecido,
     activarDesaparecido,
-    verificarPublicacion
+    verificarPublicacion,
+    CerrarDesaparecido
 };
