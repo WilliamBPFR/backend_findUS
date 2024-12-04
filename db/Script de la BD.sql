@@ -173,6 +173,16 @@ CREATE TABLE Reporte (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE UBICACION_USUARIO (
+    id SERIAL PRIMARY KEY,
+    idUsuario INT,
+    ubicacion_latitud VARCHAR(255),
+    ubicacion_longitud VARCHAR(255),
+    fechaHoraActualizacion TIMESTAMP,
+    fechaCreacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (idUsuario) REFERENCES Usuario(id)
+);
+
 
 -- Insertar datos en las tablas de catálogo
 INSERT INTO Estado (nombreEstado, tipoEstado) VALUES ('Activo', 'General');
