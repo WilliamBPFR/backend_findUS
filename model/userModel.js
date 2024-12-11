@@ -270,7 +270,7 @@ const loginUsuario = async (email, contrasena) => {
             return {autenticado: true, message: "Usuario autenticado", token: data?.session.access_token};
         }
     }else{
-        return {message: "Usuario no verificado", autenticado: false};
+        return {message: "Usuario no verificado", autenticado: false, id: usuario.id};
     }
 }
 
@@ -631,6 +631,53 @@ const informacionesHomeBO = async () => {
 
 }
 
+const guardarUbicacionRTUsuario = async (id, ubicacion) => {
+    const usuario_ubicacion = await prisma.ubicacion_usuario.findFirst({
+        where: {
+            idusuario: id
+        }
+    });
+
+    if(usuario_ubicacion){
+        await prisma.ubicacion_usuario.update({
+            where: {
+                id: usuario_ubicacion.id
+            },
+            data: {
+                ubicacion_latitud: ubicacion.latitud.toString(),
+                ubicacion_longitud: ubicacion.longitud.toString(),
+                fechahoraactualizacion: new Date()
+            }
+        });
+    }else{
+        await prisma.ubicacion_usuario.create({
+            data: {
+                usuario: {
+                    connect: {
+                        id: id
+                    }
+                },
+                ubicacion_latitud: ubicacion.latitud.toString(),
+                ubicacion_longitud: ubicacion.longitud.toString()
+            }
+        });
+    }
+
+    return {success: true, message: "Ubicación actualizada con éxito"};
+}
+
+const guardarIDNotificacionUsuario = async (id, idNotificacion) => {
+    const usuario = await prisma.usuario.update({
+        where: {
+            id: id
+        },
+        data: {
+            id_notificacion_expo: idNotificacion
+        }
+    });
+
+    return {success: true, message: "ID de notificación actualizado con éxito"};
+}
 
 module.exports = {
     crearUsuario,
@@ -653,5 +700,7 @@ module.exports = {
     obtenerInfoEditarUsuario,
     editarUsuario,
     cambiarImagenPerfil,
-    informacionesHomeBO
+    informacionesHomeBO,
+    guardarUbicacionRTUsuario,
+    guardarIDNotificacionUsuario
 };
