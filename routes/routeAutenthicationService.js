@@ -10,7 +10,7 @@ const authenticate = async (req, res, next) => {
     // Extraer el token del encabezado Authorization con el prefijo "Bearer"
     const authHeader = req.headers.authorization;
     console.log("En el AUTHENTICATE");
-    // console.log(authHeader);
+    console.log(authHeader);
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'No token provided or incorrect format' });
     }

@@ -588,8 +588,8 @@ const correo_cerrar_publicacion = async (email, nombre_usuario, nombre_persona_d
                         <body>
                             <div class="container">
                                 <img src="https://rmmjqtigwdgygmsibvuh.supabase.co/storage/v1/object/sign/assets/logo_findus.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhc3NldHMvbG9nb19maW5kdXMucG5nIiwiaWF0IjoxNzI1MTE4MDg1LCJleHAiOjQ4Nzg3MTgwODV9.vVCQU7Xajg7WcVYrGTzsVqNWEENDJlevkimRI1Fcv5k&t=2024-08-31T15%3A28%3A03.719Z" alt="Logo FindUS"/>
-                                <h1>Hola de nuevo, <strong>{{nombreUsuario}}</strong></h1>
-                                <p>Le contactamos para informarle que la siguiente publicación ha sido cerrada: {{nombredesaparecido}}. A partir de ahora, su publicación no será visible para nadie, si podrá ser modificada.</p>
+                                <h1>Hola de nuevo, <strong>${nombre_usuario}</strong></h1>
+                                <p>Le contactamos para informarle que la siguiente publicación ha sido cerrada: <strong>${nombre_persona_desaparecida}</strong>. A partir de ahora, su publicación no será visible para nadie, si podrá ser modificada.</p>
                                 <p>Si cree que se ha cometido un error, le sugerimos contactar nuestro correo de servicio para solucionar su caso: <a href="mailto:findusappservice@gmail.com">findusappservice@gmail.com</a></p>
                                 <footer>
                                     Este correo fue generado automáticamente, por favor no responda. Si necesita asistencia, visite nuestro sitio web o escribanos un correo a <a href="mailto:findusappservice@gmail.com">findusappservice@gmail.com</a>
