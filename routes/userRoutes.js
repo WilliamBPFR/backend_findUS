@@ -12,9 +12,11 @@ router.get("/obtener_info_editar_usuario",authenticate, userController.obtenerIn
 router.put("/user/editar_usuario",authenticate, userController.editarUsuario);
 router.put("/user/cambiar_foto_perfil",authenticate, userController.cambiarFotoPerfil);
 router.get("/user/obtener_informaciones_home_bo/",authenticate, userController.informacionesHomeBO);
-router.post("/user/actualizar_ubicacion_usuario",authenticate, userController.guardarUbicacionRTUsuario);
+router.put("/user/actualizar_ubicacion_usuario",authenticate, userController.guardarUbicacionRTUsuario);
 router.post("/user/guardar_id_notificacion",authenticate, userController.guardarIDNotificacionUsuario);
-
+router.get("/user/obtener_publicacion_filtros_movil/:page/:limit",authenticate, userController.getPublicacionesFitltroMovil);
+router.get("/user/crear_reporte_backoffice", authenticate, userController.crear_reporte_backoffice);
+router.post("/user/verificar_usuario_link", authenticate, userController.verificar_usuario_link);
 // Rutas públicas
 router.get('/user/:id', userController.getUserById);
 router.get('/user', userController.getAllUser);
@@ -22,6 +24,7 @@ router.put('/user/admin_update_user/:id', userController.updateAdminAUsuario);
 router.post('/user/registrar_usuario', userController.registrar_usuario);
 router.post('/user/confirmar_correo', userController.confirmar_correo);
 router.post('/user/login', userController.login_usuario);
+router.post('/user/login_user_bo', userController.loginUsuarioBackOffice);
 router.put('/user/modificar_usuario', userController.modificar_usuario);
 router.put('/user/cambiar_rol', userController.modificar_rol_Usuario);
 router.post('/user/solicitar_cambio_contrasena', userController.solicitar_cambio_contrasena);

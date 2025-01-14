@@ -1,6 +1,8 @@
 const desaparecidoModel = require('../model/desaparecidoModel');
 const ubicacionService = require('../services/ubicacion');
 
+
+
 // Create post desaparecido
 const createDesaparecido = async (req, res) => {
     /* #swagger.tags = ['Desaparecido']
@@ -194,10 +196,21 @@ const getDesaparecidosByUser = async (req, res) => {
     }
 };
 
-const getInfoDesaparecidoByID = async (req, res) => {
+const getInfoDesaparecidoByID_Movil = async (req, res) => {
     // #swagger.tags = ['Desaparecido']
     try {
-        const desaparecido = await desaparecidoModel.getInfoDesaparecidoByID(req.params.id);
+        const desaparecido = await desaparecidoModel.getInfoDesaparecidoByID_Movil(req.params.id);
+        res.status(200).json(desaparecido);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+const getInfoDesaparecidoByID_BO = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        const desaparecido = await desaparecidoModel.getInfoDesaparecidoByID_BO(req.params.id);
         res.status(200).json(desaparecido);
     } catch (error) {
         console.log(error);
@@ -274,6 +287,16 @@ const activarDesaparecido = async (req, res) => {
     }
 }
 
+const cerrarDesaparecido = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        await desaparecidoModel.CerrarDesaparecido(req.params.id,req.params.tipoCierre);
+        res.status(200).json({ message: "Desaparecido cerrado exitosamente"});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 const verificarPublicacion = async (req, res) => {
     // #swagger.tags = ['Desaparecido']
     try {
@@ -283,6 +306,22 @@ const verificarPublicacion = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+
+const pruebaDistanciaUbicacion = async (req, res) => {
+    // #swagger.tags = ['Desaparecido']
+    try {
+        const longitud = req.params.longitud;
+        const latitud = req.params.latitud;
+        await desaparecidoModel.pruebaLocationService(latitud,longitud);
+        res.status(200).json({ message: "Distancia calculada exitosamente"});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
 module.exports = {
     createDesaparecido,
     getDesaparecido,
@@ -292,7 +331,8 @@ module.exports = {
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
     getDesaparecidosByUser,
-    getInfoDesaparecidoByID,
+    getInfoDesaparecidoByID_Movil,
+    getInfoDesaparecidoByID_BO,
     pruebaLocalidad,
     crearComentarioPublicaciones,
     getDesaparecidosTableBO,
@@ -300,5 +340,7 @@ module.exports = {
     updateDesaparecidoBO,
     desactivarDesaparecido,
     activarDesaparecido,
-    verificarPublicacion
+    verificarPublicacion,
+    cerrarDesaparecido,
+    pruebaDistanciaUbicacion
 };

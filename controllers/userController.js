@@ -59,6 +59,25 @@ const registrar_usuario = async (req, res) => {
     }
 }
 
+const verificar_usuario_link = async (req, res) => {
+    /* #swagger.tags = ['User']
+       #swagger.description = 'Endpoint para verificar un usuario por link.'
+    */
+    try {
+        console.log("ENTREE A VERIFICAR LINKKKKK: ", req.user.id_user);
+        const verificado = await userModel.verificar_usuario_link_bo(req.user.id_user);
+        if(verificado.verificado){
+            return res.status(200).json({ message: "Usuario Verificado" });
+        }else{
+            return res.status(400).json({ message: "Error al verificar el usuario." });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+         
+
 const confirmar_correo = async (req, res) => {
     /* #swagger.tags = ['User']
        #swagger.description = 'Endpoint para registrar un usuario.'
@@ -190,7 +209,33 @@ const login_usuario = async (req, res) => {
             console.log(usuario);
             return res.status(200).json({ message: "Usuario logueado correctamente", token: usuario.token, autenticado: true, id_usuario: usuario.id });
         }else{
-            return res.status(400).json({ message: "Correo o Contraseña incorrecta. Revise e intente de nuevo"  }); //usuario.message.includes("Invalid login credentials") ? "Contraseña o Correo" : usuario.message
+            return res.status(400).json({ message: usuario.message }); //usuario.message.includes("Invalid login credentials") ? "Contraseña o Correo" : usuario.message
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+const loginUsuarioBackOffice = async (req, res) => {
+    /* #swagger.tags = ['User']
+       #swagger.description = 'Endpoint para iniciar sesión.'
+       #swagger.parameters['obj'] = {
+            in: 'body',
+            description: 'Información del usuario para iniciar sesión.',
+            required: true,
+            schema: {
+                email: 'usuario@ejemplo.com',
+                contrasena: '123456'
+            }
+        }
+    */
+    try {
+        const usuario = await userModel.loginUsuarioBackOffice(req.body.email, req.body.contrasena);
+        if(usuario.autenticado){
+            console.log(usuario);
+            return res.status(200).json({ message: "Usuario logueado correctamente", token: usuario.token, autenticado: true, id_usuario: usuario.id, id_rol: usuario.id_rol, nombre_rol: usuario.nombre_rol});
+        }else{
+            return res.status(400).json({ message: usuario.message  }); //usuario.message.includes("Invalid login credentials") ? "Contraseña o Correo" : usuario.message
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -395,6 +440,31 @@ const guardarIDNotificacionUsuario = async (req, res) => {
     }
 }
 
+const getPublicacionesFitltroMovil = async (req, res) => {
+    try {
+        console.log("FILTRO MOVIL");
+        console.log(req.query);
+        const publicaciones = await userModel.getPublicacionesFiltroMovil(req.params.page, req.params.limit, req.query.nombre);
+        res.status(200).json(publicaciones);
+    } catch (error) {
+        console.error('Error al obtener las publicaciones:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+
+const crear_reporte_backoffice = async (req, res) => {
+    // #swagger.tags = ['User']
+    try {
+       
+        const filebase64 = await userModel.crear_reporte_backoffice();
+        res.status(200).json({ filebase64: filebase64 });
+    } catch (error) {
+        console.error('Error al crear el reporte:', error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     registrar_usuario,
     confirmar_correo,
@@ -417,5 +487,9 @@ module.exports = {
     cambiarFotoPerfil,
     informacionesHomeBO,
     guardarUbicacionRTUsuario,
-    guardarIDNotificacionUsuario
+    guardarIDNotificacionUsuario,
+    getPublicacionesFitltroMovil,
+    loginUsuarioBackOffice,
+    crear_reporte_backoffice,
+    verificar_usuario_link
 };

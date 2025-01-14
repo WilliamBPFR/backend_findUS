@@ -19,12 +19,15 @@ router.delete('/desaparecido/deleteDesaparecido/:id', desaparecidoController.del
 // Rutas Públicas
 router.get('/desaparecido/obtenerDesaparecidosActivosScrollGrande/:page/:limit', desaparecidoController.getDesaparecidosActivosScrollGrande);
 router.get('/desaparecido/obtenerDesaparecidosActivosScrollHorizontal', desaparecidoController.getDesaparecidosActivosScrollHorizontal);
-router.get('/desaparecido/obtenerInfoDesaparecidoByID/:id', desaparecidoController.getInfoDesaparecidoByID);
+router.get('/desaparecido/obtenerInfoDesaparecidoByID_Movil/:id', desaparecidoController.getInfoDesaparecidoByID_Movil);
+router.get('/desaparecido/obtenerInfoDesaparecidoByID_BO/:id', desaparecidoController.getInfoDesaparecidoByID_BO);
 router.post('/desaparecido/pruebaLocalidad', desaparecidoController.pruebaLocalidad);
 router.get('/desaparecido/obtenerInformacionEditarPublicacionBO/:id', desaparecidoController.obtenerInformacionEditarPublicacionBO);
 router.put('/desaparecido/actualizarDesaparecidoBO/:id', desaparecidoController.updateDesaparecidoBO);
 router.put('/desaparecido/activarPublicacion/:id', desaparecidoController.activarDesaparecido);
 router.put('/desaparecido/desactivarPublicacion/:id', desaparecidoController.desactivarDesaparecido);
 router.put('/desaparecido/verificarPublicacion/:id', desaparecidoController.verificarPublicacion);
+router.put('/desaparecido/cerrarPublicacion/:id/:tipoCierre', desaparecidoController.cerrarDesaparecido);
+router.get('/desaparecido/pruebaLongitudService/:latitud/:longitud', desaparecidoController.pruebaDistanciaUbicacion);
 
 module.exports = router;

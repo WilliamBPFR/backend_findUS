@@ -5,15 +5,16 @@ const { getLocalidadUbicacion } = require('../services/ubicacion');
 const prisma = new PrismaClient()
 
 const crearAvistamiento = async (avistamiento_data,id_usuario) => {
-    const localidadAvistamiento = await getLocalidadUbicacion(avistamiento_data.ubicacion_latitud, avistamiento_data.ubicacion_longitud);
+    const localidadAvistamiento = await getLocalidadUbicacion(avistamiento_data?.ubicacion_latitud, avistamiento_data?.ubicacion_longitud);
+    console.log("PASE LA LOCALIDAD");
     const avistamiento = await prisma.avistamiento.create({
         data: {
             idusuario: id_usuario,
-            idpublicacion: parseInt(avistamiento_data.idPublicacion),
-            ubicacion_desaparicion_latitud: avistamiento_data.ubicacion_latitud,
-            ubicacion_desaparicion_longitud: avistamiento_data.ubicacion_longitud,
-            fechahora: new Date(avistamiento_data.fecha_avistamiento),
-            detalles: avistamiento_data.detalles,
+            idpublicacion: parseInt(avistamiento_data?.idPublicacion),
+            ubicacion_desaparicion_latitud: avistamiento_data?.ubicacion_latitud,
+            ubicacion_desaparicion_longitud: avistamiento_data?.ubicacion_longitud,
+            fechahora: new Date(avistamiento_data?.fecha_avistamiento),
+            detalles: avistamiento_data?.detalles,
             localidad_avistamiento: localidadAvistamiento,
             verificado: false,
             idestatus: 1,

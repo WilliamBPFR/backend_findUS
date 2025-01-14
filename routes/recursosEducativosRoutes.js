@@ -16,4 +16,5 @@ router.put('/recursos_educativos/activarRecursoEducativo/:id', recursosEducativo
 router.get('/recursos_educativos/obtenerMaterialEducativoTabla/:page/:limit', recursosEducativosController.getMaterialEducativoTableBO);
 router.get('/recursos_educativos/obtenerMaterialEducativoByID/:id', recursosEducativosController.getMaterialEducativoByID);
 
+router.put('/recursos_educativos/anadir_vista_a_material/:id', recursosEducativosController.anadir_vista_a_material);
 module.exports = router;

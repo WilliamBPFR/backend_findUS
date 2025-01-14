@@ -28,7 +28,7 @@ const crearAvistamiento = async (req, res) => {
     */
     try {
         console.log("Datos de la Peticion",req.body);
-        const avistamiento = await avistamientoModel.crearAvistamiento(req.body.dataAvistamiento,34);
+        const avistamiento = await avistamientoModel.crearAvistamiento(req.body.dataAvistamiento, req.user.id_user);
         if(!avistamiento){
             return res.status(400).json({ message: "Error al crear el avistamiento"});
         }
