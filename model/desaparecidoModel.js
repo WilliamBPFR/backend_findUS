@@ -605,7 +605,7 @@ const pruebaLocationService = async (latitude, longitude) => {
     });
 }
 
-const enviarNotificacionUsuariosCercanos = async (latitude, longitude, nombreDesaparecido) => {
+const enviarNotificacionUsuariosCercanos = async (latitude, longitude, nombreDesaparecido, idpublicacion) => {
     const dispositivos_activos = await prisma.ubicacion_usuario.findMany({include:{usuario:true}});
     
     let dispositivos_cercanos = [];
@@ -617,8 +617,8 @@ const enviarNotificacionUsuariosCercanos = async (latitude, longitude, nombreDes
                 sound: 'default',
                 title: 'Persona Desaparecida en tu área',
                 body: `Se ha reportado la desaparición de ${nombreDesaparecido} en tu área. Ayuda a encontrarlo.`,
-                data: { someData: 'goes here' },
-                image: {uri: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png'},
+                data: { idpublicacion: idpublicacion },
+                image: {uri: 'https://rmmjqtigwdgygmsibvuh.supabase.co/storage/v1/object/sign/assets/notification_icon.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhc3NldHMvbm90aWZpY2F0aW9uX2ljb24ucG5nIiwiaWF0IjoxNzM2ODgzMTA2LCJleHAiOjg2NTczNjc5NjcwNn0.ye-BOtmktivP4h_S0LUhKJEEMsjvknojGDF-gn9rc7U&t=2025-01-14T19%3A31%3A46.979Z'},
               };
               await fetch('https://exp.host/--/api/v2/push/send', {
                 method: 'POST',

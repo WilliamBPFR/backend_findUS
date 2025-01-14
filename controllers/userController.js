@@ -59,6 +59,25 @@ const registrar_usuario = async (req, res) => {
     }
 }
 
+const verificar_usuario_link = async (req, res) => {
+    /* #swagger.tags = ['User']
+       #swagger.description = 'Endpoint para verificar un usuario por link.'
+    */
+    try {
+        console.log("ENTREE A VERIFICAR LINKKKKK: ", req.user.id_user);
+        const verificado = await userModel.verificar_usuario_link_bo(req.user.id_user);
+        if(verificado.verificado){
+            return res.status(200).json({ message: "Usuario Verificado" });
+        }else{
+            return res.status(400).json({ message: "Error al verificar el usuario." });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+         
+
 const confirmar_correo = async (req, res) => {
     /* #swagger.tags = ['User']
        #swagger.description = 'Endpoint para registrar un usuario.'
@@ -190,7 +209,7 @@ const login_usuario = async (req, res) => {
             console.log(usuario);
             return res.status(200).json({ message: "Usuario logueado correctamente", token: usuario.token, autenticado: true, id_usuario: usuario.id });
         }else{
-            return res.status(400).json({ message: "Correo o Contraseña incorrecta. Revise e intente de nuevo"  }); //usuario.message.includes("Invalid login credentials") ? "Contraseña o Correo" : usuario.message
+            return res.status(400).json({ message: usuario.message }); //usuario.message.includes("Invalid login credentials") ? "Contraseña o Correo" : usuario.message
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -471,5 +490,6 @@ module.exports = {
     guardarIDNotificacionUsuario,
     getPublicacionesFitltroMovil,
     loginUsuarioBackOffice,
-    crear_reporte_backoffice
+    crear_reporte_backoffice,
+    verificar_usuario_link
 };

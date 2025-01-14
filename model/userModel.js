@@ -14,6 +14,9 @@ const crearUsuario = async (user_data) => {
     const { data, error } = await supabaseAnon.auth.signUp({
         email: user_data.email,
         password: user_data.contrasena,
+        options: {
+            emailRedirectTo: "http://localhost:3000/usuario_verificado"
+        }
     });
     if (error) {
         console.error('Error en el registro en Supabase Auth:', error);
@@ -117,6 +120,31 @@ const verificarUsuario = async (email) => {
     const user = await prisma.usuario.findFirst({
         where: {
             email: email
+        }
+    });
+
+    if(user){
+        const updateuser = await prisma.usuario.update({
+            where: {
+                id: user.id
+            },
+            data: {
+                verificado: true
+            }
+        });
+
+        if(updateuser){
+            return {message: "Usuario verificado", verificado: true};
+        }else{
+            return {message: "Error al verificar usuario", verificado: false};
+        }
+    }
+}
+
+const verificar_usuario_link_bo = async (id) => {
+    const user = await prisma.usuario.findFirst({
+        where: {
+            id: id
         }
     });
 
@@ -256,7 +284,7 @@ const loginUsuario = async (email, contrasena) => {
     });
 
     if(!usuario){
-        return {message: "Usuario no encontrado", autenticado: false};
+        return {message: "Correo o Contraseña incorrecta. Revise e intente de nuevo", autenticado: false};
     }
 
     if(usuario.verificado){
@@ -266,14 +294,15 @@ const loginUsuario = async (email, contrasena) => {
         });
         if(error){
             console.error('Error en la verificación del correo:', error);
-            return { autenticado: false, message: error.message };
+            console.log(error.message);
+            return { autenticado: false, message: "Correo o Contraseña incorrecta. Revise e intente de nuevo" };
         }
 
         if(data){
             return {autenticado: true, message: "Usuario autenticado", token: data?.session.access_token};
         }
     }else{
-        return {message: "Usuario no verificado", autenticado: false, id: usuario.id};
+        return {message: "Usuario no verificado. Verifique su usuario antes de continuar.", autenticado: false, id: usuario.id};
     }
 }
 
@@ -292,11 +321,10 @@ const loginUsuarioBackOffice = async (email, contrasena) => {
         return {message: "Correo o Contraseña incorrecta. Revise e intente de nuevo", autenticado: false};
     }
 
-    if (usuario.idrol == 1) {
-        return {message: "Usuario no tiene los permisos necesarios para acceder a la aplicación. Contacte con un administrador para la concesión de los permisos.", autenticado: false};
-    }
-
     if(usuario.verificado){
+        if (usuario.idrol == 1) {
+            return {message: "Usuario no tiene los permisos necesarios para acceder a la aplicación. Contacte con un administrador para la concesión de los permisos.", autenticado: false};
+        }
         const {data,error} = await supabaseAnon.auth.signInWithPassword({
             email: email,
             password: contrasena
@@ -964,5 +992,6 @@ module.exports = {
     guardarIDNotificacionUsuario,
     getPublicacionesFiltroMovil,
     loginUsuarioBackOffice,
-    crear_reporte_backoffice
+    crear_reporte_backoffice,
+    verificar_usuario_link_bo
 };

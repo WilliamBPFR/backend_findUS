@@ -16,6 +16,7 @@ router.put("/user/actualizar_ubicacion_usuario",authenticate, userController.gua
 router.post("/user/guardar_id_notificacion",authenticate, userController.guardarIDNotificacionUsuario);
 router.get("/user/obtener_publicacion_filtros_movil/:page/:limit",authenticate, userController.getPublicacionesFitltroMovil);
 router.get("/user/crear_reporte_backoffice", authenticate, userController.crear_reporte_backoffice);
+router.post("/user/verificar_usuario_link", authenticate, userController.verificar_usuario_link);
 // Rutas públicas
 router.get('/user/:id', userController.getUserById);
 router.get('/user', userController.getAllUser);
