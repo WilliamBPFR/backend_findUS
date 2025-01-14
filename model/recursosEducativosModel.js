@@ -196,6 +196,20 @@ const activarRecursoEducativo = async (id) => {
     return recurso;
 }
 
+const anadir_vista_a_material = async (id) => {
+    const recurso = await prisma.recursoeducativo.update({
+        where: {
+            id: parseInt(id)
+        },
+        data: {
+            vistas: {
+                increment: 1
+            }
+        }
+    }
+)
+    return recurso;
+}
 
 module.exports = {
     obtenerRecursosEducativos,
@@ -213,4 +227,6 @@ module.exports = {
     obtenerRecursosEducativosActivos,
     getMaterialEducativoTableBO,
     getMaterialEducativoByID,
+
+    anadir_vista_a_material
 }

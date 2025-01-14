@@ -107,7 +107,7 @@ model publicacion {
   idusuario                       Int?
   nombredesaparecido              String?            @db.VarChar(255)
   idtipodocumento                 Int?
-  numerodocumentodesaparecido     String?            @db.VarChar(11)
+  numerodocumentodesaparecido     String?
   edad                            Int?
   telefono                        String?            @db.VarChar(10)
   fechadesaparicion               DateTime?          @db.Timestamp(6)
@@ -141,6 +141,7 @@ model recursoeducativo {
   urlmaterial         String?
   fechacreacion       DateTime?          @default(now()) @db.Timestamp(6)
   fecha_modificacion  DateTime?          @db.Timestamp(6)
+  vistas              BigInt?
   categoriamaterial   categoriamaterial? @relation(fields: [idcategoriamaterial], references: [id], onDelete: NoAction, onUpdate: NoAction)
   estado              estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
   usuario             usuario?           @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -175,12 +176,12 @@ model usuario {
   apellido                  String?             @db.VarChar(255)
   email                     String?             @db.VarChar(255)
   fechanacimiento           DateTime?           @db.Timestamp(6)
-  numerotelefono            String?             @db.VarChar(255)
+  numerotelefono            String?
   urlfotoperfil             String?
   verificado                Boolean?
   codigoverificacionusuario String?             @db.VarChar(255)
   idtipodocumento           Int?
-  numerodocumento           String?             @db.VarChar(255)
+  numerodocumento           String?
   idrol                     Int?
   idestado                  Int?
   fechacreacion             DateTime?           @default(now()) @db.Timestamp(6)
