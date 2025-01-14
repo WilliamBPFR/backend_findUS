@@ -158,6 +158,16 @@ const activarRecursoEducativo = async (req, res) => {
     }
 }
 
+const anadir_vista_a_material = async (req, res) => {
+    // #swagger.tags = ['Recursos Educativos']
+    try {
+        await recursosEducativosModel.anadir_vista_a_material(req.params.id);
+        res.status(200).json({mensaje: 'Vista añadida correctamente'});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     obtenerRecursosEducativos,
     obtenerRecursoEducativo,
@@ -171,5 +181,6 @@ module.exports = {
 
     obtenerRecursosEducativosActivos,
     getMaterialEducativoTableBO,
-    getMaterialEducativoByID
+    getMaterialEducativoByID,
+    anadir_vista_a_material
 }

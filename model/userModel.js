@@ -3,6 +3,9 @@ const encryptService = require('../services/encryptService');
 const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
 const { uploadFile } = require('../services/uploadFiles');
 const e = require('express');
+const resendService = require('../services/resendService');
+const reportesServices = require('../services/reportesServices');
+
 
 const prisma = new PrismaClient()
 
@@ -270,10 +273,46 @@ const loginUsuario = async (email, contrasena) => {
             return {autenticado: true, message: "Usuario autenticado", token: data?.session.access_token};
         }
     }else{
-        return {message: "Usuario no verificado", autenticado: false};
+        return {message: "Usuario no verificado", autenticado: false, id: usuario.id};
     }
 }
 
+const loginUsuarioBackOffice = async (email, contrasena) => {
+    console.log('Login Usuario:', email, contrasena);
+    const usuario = await prisma.usuario.findFirst({
+        where: {
+            email: email
+        },
+        include:{
+            rol: true
+        }
+    });
+
+    if(!usuario){
+        return {message: "Correo o Contraseña incorrecta. Revise e intente de nuevo", autenticado: false};
+    }
+
+    if (usuario.idrol == 1) {
+        return {message: "Usuario no tiene los permisos necesarios para acceder a la aplicación. Contacte con un administrador para la concesión de los permisos.", autenticado: false};
+    }
+
+    if(usuario.verificado){
+        const {data,error} = await supabaseAnon.auth.signInWithPassword({
+            email: email,
+            password: contrasena
+        });
+        if(error){
+            console.error('Error en la verificación del correo:', error);
+            return { autenticado: false, message: error.message };
+        }
+
+        if(data){
+            return {autenticado: true, message: "Usuario logueado correctamente.", token: data?.session.access_token, id_usuario: usuario.id, id_rol: usuario.idrol, nombre_rol: usuario.rol.nombrerol};
+        }
+    }else{
+        return {message: "Usuario no verificado. Verifique sus correos y verifícalo.", autenticado: false};
+    }
+}
 const modificarUsuario = async (user_data) => {
     const user = await prisma.usuario.update({
         where: {
@@ -302,13 +341,34 @@ const cambiarRolUsuario = async (email, idRol) => {
             email: email
         },
         data: {
-            idRol: idRol
+            idrol: idRol
+        },
+        include: {
+            rol: true
         }
     });
+
+    const rol = await prisma.rol.findFirst({
+        where: {
+            id: idRol
+        }
+    });
+
+    resendService.correo_cambio_roles(user.email, `${user.nombre} ${user.apellido}`,rol.nombrerol);
+
     return user;
 }
 
 const modificarAdminAUsuario = async (id, user_data) => {
+    const estado_user_antiguo = await prisma.usuario.findFirst({
+        where: {
+            id: id
+        },
+        select: {
+            idestado: true
+        }
+    });
+
     const user = await prisma.usuario.update({
         where: {
             id: id
@@ -316,8 +376,21 @@ const modificarAdminAUsuario = async (id, user_data) => {
         data: {
             idrol: user_data.rol,
             idestado: user_data.estado
+        },
+        include: {
+            rol: true,
         }
     });
+
+    if (estado_user_antiguo.idestado != user_data.estado) {
+        if (user_data.estado == 1) {
+            resendService.correo_activación_usuario(user.email, `${user.nombre} ${user.apellido}`);
+        }else if (user_data.estado == 2) {
+            resendService.correo_desactivación_usuario(user.email, `${user.nombre} ${user.apellido}`);
+        }
+    }else{
+        resendService.correo_cambio_roles(user.email, `${user.nombre} ${user.apellido}`,user.rol.nombrerol);
+    }
     return user;
 }
 
@@ -572,7 +645,12 @@ const informacionesHomeBO = async () => {
             idestado: 1
         }
     });
-
+    
+    const total_reportes_resueltos = await prisma.publicacion.count({
+        where: {
+            idestado: 4
+        }
+    });
 
 
     //Informaciones de la Semana Pasada
@@ -586,7 +664,8 @@ const informacionesHomeBO = async () => {
         publicaciones_activas,
         publicaciones_semana,
         avistamientos_semana,
-        total_usuarios_activos
+        total_usuarios_activos,
+        total_reportes_resueltos
     };
 
     const cantidad_total_usuarios = await prisma.usuario.count();
@@ -631,7 +710,234 @@ const informacionesHomeBO = async () => {
 
 }
 
+const guardarUbicacionRTUsuario = async (id, ubicacion) => {
+    const usuario_ubicacion = await prisma.ubicacion_usuario.findFirst({
+        where: {
+            idusuario: id
+        }
+    });
 
+    if(usuario_ubicacion){
+        await prisma.ubicacion_usuario.update({
+            where: {
+                id: usuario_ubicacion.id
+            },
+            data: {
+                ubicacion_latitud: ubicacion.latitud.toString(),
+                ubicacion_longitud: ubicacion.longitud.toString(),
+                fechahoraactualizacion: new Date()
+            }
+        });
+    }else{
+        await prisma.ubicacion_usuario.create({
+            data: {
+                usuario: {
+                    connect: {
+                        id: id
+                    }
+                },
+                ubicacion_latitud: ubicacion.latitud.toString(),
+                ubicacion_longitud: ubicacion.longitud.toString()
+            }
+        });
+    }
+
+    return {success: true, message: "Ubicación actualizada con éxito"};
+}
+
+const guardarIDNotificacionUsuario = async (id, idNotificacion) => {
+    const usuario = await prisma.usuario.update({
+        where: {
+            id: id
+        },
+        data: {
+            id_notificacion_expo: idNotificacion
+        }
+    });
+
+    return {success: true, message: "ID de notificación actualizado con éxito"};
+}
+
+const getPublicacionesFiltroMovil = async (page, limit,nombre) => {
+
+    const publicaciones = await prisma.publicacion.findMany({
+        where: {
+            OR: [
+                { nombredesaparecido: { contains: nombre, mode: 'insensitive' } },
+                { descripcionpersonadesaparecido: { contains: nombre, mode: 'insensitive' } }
+            ],
+            idestado: 1
+        },
+        select: {
+            nombredesaparecido: true,
+            id: true,
+            fechadesaparicion: true,
+            fechacreacion: true,
+            fotospublicacion:{
+                select:{
+                    urlarchivo: true
+                },
+                where: {
+                    idtipofotopublicacion: 1
+                }
+            }
+        },
+        take: parseInt(limit),
+        skip: (parseInt(page) - 1) * parseInt(limit),
+        orderBy: {
+            fechacreacion: 'desc'
+        }
+    },);
+
+    return publicaciones;
+}
+
+const crear_reporte_backoffice = async () => {
+    // Usuarios
+    const total_usuario = await prisma.usuario.count();
+    const total_usuarios_activos = await prisma.usuario.count({
+        where: {
+            idestado: 1
+        }
+    });
+    const total_usuarios_inactivos = await prisma.usuario.count({
+        where: {
+            idestado: 2
+        }
+    });
+    const total_usuarios_por_rol = await prisma.rol.findMany({
+        select: {
+            id: true,
+            nombrerol: true,
+            _count: {
+                select: {
+                    usuario: true
+                }
+            }
+        }
+    });
+
+    const usuario_data = [
+        { Tipo: 'Total', Cantidad: total_usuario },
+        { Tipo: 'Activos', Cantidad: total_usuarios_activos },
+        { Tipo: 'Inactivos', Cantidad: total_usuarios_inactivos },
+        ...total_usuarios_por_rol.map(rol => ({
+            Tipo: `Usuarios como ${rol.nombrerol}`,
+            Cantidad: rol._count.usuario
+        }))
+    ]
+
+    // Publicaciones
+    const total_publicaciones = await prisma.publicacion.count();
+    const total_publicaciones_activas = await prisma.publicacion.count({
+        where: {
+            idestado: 1
+        }
+    });
+    const total_publicaciones_inactivas = await prisma.publicacion.count({
+        where: {
+            idestado: 2
+        }
+    });
+    const total_publicaciones_cerradas_totales = await prisma.publicacion.count({
+        where: {
+            OR: [
+                { idestado: 4 },
+                { idestado: 5 }
+            ]
+        }
+    });
+    const total_publicaciones_cerradas_resueltas = await prisma.publicacion.count({
+        where: {
+            idestado: 4,
+        }
+    });
+    const total_publicaciones_cerradas_no_resueltas = await prisma.publicacion.count({
+        where: {
+            idestado: 5
+        }
+    });
+    const total_comentarios_en_publicaciones = await prisma.comentario.count();
+
+    const publicaciones_data = [
+        { Tipo: 'Total', Cantidad: total_publicaciones },
+        { Tipo: 'Activas', Cantidad: total_publicaciones_activas },
+        { Tipo: 'Inactivas', Cantidad: total_publicaciones_inactivas },
+        { Tipo: 'Cerradas', Cantidad: total_publicaciones_cerradas_totales },
+        { Tipo: 'Cerradas Resueltas', Cantidad: total_publicaciones_cerradas_resueltas },
+        { Tipo: 'Cerradas No Resueltas', Cantidad: total_publicaciones_cerradas_no_resueltas },
+        { Tipo: 'Total de Comentarios en Publicaciones', Cantidad: total_comentarios_en_publicaciones }
+    ];
+
+    // Avistamientos
+    const total_avistamientos = await prisma.avistamiento.count();
+    const avistamientos_en_publicaciones_cerradas_resueltas = await prisma.avistamiento.count({
+        where: {
+            publicacion: {
+                idestado: 4
+            }
+        }
+    });
+    const avistamientos_en_publicaciones_cerradas_no_resueltas = await prisma.avistamiento.count({
+        where: {
+            publicacion: {
+                idestado: 5
+            }
+        }
+    });
+
+    const avistamientos_data = [
+        { Tipo: 'Total', Cantidad: total_avistamientos },
+        { Tipo: 'Avisatamientos en publicaciones cerradas resueltas', Cantidad: avistamientos_en_publicaciones_cerradas_resueltas },
+        { Tipo: 'Avistamientos en publicaciones cerradas no resueltas', Cantidad: avistamientos_en_publicaciones_cerradas_no_resueltas }
+    ];
+
+    // Material Educativo
+    const total_material_educativo = await prisma.recursoeducativo.count();
+    const total_material_educativo_activos = await prisma.recursoeducativo.count({
+        where: {
+            idestado: 1
+        }
+    });
+    const total_material_educativo_inactivos = await prisma.recursoeducativo.count({
+        where: {
+            idestado: 2
+        }
+    });
+    const total_material_educatico_por_categoria = await prisma.categoriamaterial.findMany({
+        select: {
+            id: true,
+            nombrecategoriamaterial: true,
+            _count: {
+                select: {
+                    recursoeducativo: true,
+                }
+            },
+        }
+    });
+
+    const total_vistas_por_tipo_material_educativo = await prisma.recursoeducativo.groupBy({
+        by: ['idcategoriamaterial'],
+        _sum: {
+            vistas: true,
+        }
+    });
+
+
+    const material_educativo_data = [
+        { Tipo: 'Total', Cantidad: total_material_educativo , Vistas: "N/A"},
+        { Tipo: 'Activos', Cantidad: total_material_educativo_activos, Vistas: "N/A" },
+        { Tipo: 'No Activos', Cantidad: total_material_educativo_inactivos, Vistas: "N/A" },
+        ...total_material_educatico_por_categoria.map(categoria => ({
+            Tipo: `Material Educativo - ${categoria.nombrecategoriamaterial}`,
+            Cantidad: categoria._count.recursoeducativo,
+            Vistas: total_vistas_por_tipo_material_educativo.find(vistas => vistas.idcategoriamaterial === categoria.id)?._sum.vistas === undefined ? 0 : parseInt(total_vistas_por_tipo_material_educativo.find(vistas => vistas.idcategoriamaterial === categoria.id)._sum.vistas)
+        }))
+    ];
+    console.log('Material Educativo:', material_educativo_data);
+    const filebase64 = await reportesServices.crear_reporte_excel(usuario_data,publicaciones_data,avistamientos_data,material_educativo_data); 
+    return filebase64;
+}   
 module.exports = {
     crearUsuario,
     usuarioExistnente,
@@ -653,5 +959,10 @@ module.exports = {
     obtenerInfoEditarUsuario,
     editarUsuario,
     cambiarImagenPerfil,
-    informacionesHomeBO
+    informacionesHomeBO,
+    guardarUbicacionRTUsuario,
+    guardarIDNotificacionUsuario,
+    getPublicacionesFiltroMovil,
+    loginUsuarioBackOffice,
+    crear_reporte_backoffice
 };

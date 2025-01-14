@@ -2,6 +2,8 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const {supabaseAnon,supabaseAdmin} = require('../services/supabaseService');
 const {getLocalidadUbicacion} = require('../services/ubicacion');
+const locationService = require('../services/locationService');
+const resendService = require('../services/resendService');
 
 // Crear un nuevo desaparecido
 const crearDesaparecido = async (desaparecido_data,user_id) => {
@@ -33,8 +35,14 @@ const crearDesaparecido = async (desaparecido_data,user_id) => {
                     connect: { id: desaparecido_data.idestado || 1 } // Conectar con el estado usando su ID, 1 como valor por defecto
                 },
                 fechacreacion: new Date(), // Generar la fecha actual
+            },
+            include: {
+                usuario: true
             }
         });
+
+        await enviarNotificacionUsuariosCercanos(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud,desaparecido_data.nombre_desaparecido);
+        await resendService.correo_crear_publicacion(desaparecido.usuario.email,`${desaparecido.usuario.nombre} ${desaparecido.usuario.apellido}`,desaparecido.nombredesaparecido);
         return { success: true, id: desaparecido.id };
     } catch (error) {
         console.error('Error al crear el desaparecido:', error);
@@ -83,7 +91,21 @@ const getDesaparecidosByUser = async (id) => {
             select:{
                 id: true,
                 nombredesaparecido: true,
+                tipodocumento: {
+                    select:{
+                        id: true,
+                        nombretipodocumento: true
+                    }
+                },
+                numerodocumentodesaparecido: true,
+                telefono: true,
                 fechadesaparicion: true,
+                descripcionpersonadesaparecido: true,
+                relacionusuariocondesaparecido: true,
+                informacioncontacto: true,
+                ubicacion_desaparicion_latitud: true,
+                ubicacion_desaparicion_longitud: true,
+                fechanacimiento: true,
                 estado: {
                     select:{
                         id: true,
@@ -200,7 +222,67 @@ const getDesaparecidosActivosScrollHorizontal = async () => {
 
 }
 
-const getInfoDesaparecidoByID = async (id) => {
+const getInfoDesaparecidoByID_Movil = async (id) => {
+    const publicacion = await prisma.publicacion.findUnique({
+        where: {
+            id: parseInt(id)
+        },
+        include:{
+            tipodocumento: true,
+            estado: true,
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                    idtipofotopublicacion: true
+                },
+                where:{
+                    idtipofotopublicacion: 1
+                },
+            },
+            avistamiento:{
+                where:{
+                    estado: {
+                        id: 1
+                    }
+                },
+                include:{
+                    fotosavistamiento: {
+                        select:{
+                            urlarchivo: true,
+                        }
+                    },
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    },
+                    estado: true
+                },
+                orderBy:{
+                    id: 'desc'
+                }
+                    
+            },
+            comentario:{
+                include:{
+                    usuario:{
+                        select:{
+                            nombre: true,
+                            apellido: true,
+                            urlfotoperfil: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+    return publicacion;
+
+}
+
+const getInfoDesaparecidoByID_BO = async (id) => {
     const publicacion = await prisma.publicacion.findUnique({
         where: {
             id: parseInt(id)
@@ -254,6 +336,7 @@ const getInfoDesaparecidoByID = async (id) => {
     return publicacion;
 
 }
+
 
 
 const crearComentarioPublicaciones = async (comentario,user_id) => {
@@ -393,12 +476,40 @@ const updateDesaparecidoBO = async (id, desaparecido_data) => {
 
 // Actualizar un desaparecido por ID
 const updateDesaparecido = async (id, data) => {
-    return await prisma.publicacion.update({
-        where: {
-            id: parseInt(id),
-        },
-        data: data,
-    });
+    const localidad = await getLocalidadUbicacion(data.ubicacion_latitud,data.ubicacion_longitud)
+    try{
+        const desaparecido = await prisma.publicacion.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                nombredesaparecido: data.nombre_desaparecido,
+                tipodocumento: {
+                    connect: { id: data.id_tipo_documento } // Conectar con el tipo de documento usando su ID
+                },
+                numerodocumentodesaparecido: data.documento_desaparecido,
+                edad: data.edad, // Valor directo (no relación)
+                telefono: data.telefono,
+                fechadesaparicion: data.fecha_desaparicion,
+                descripcionpersonadesaparecido: data.descripcion_desaparecido,
+                relacionusuariocondesaparecido: data.relacion_desaparecido,
+                informacioncontacto: data.contacto,
+                ubicacion_desaparicion_latitud: data.ubicacion_latitud,
+                ubicacion_desaparicion_longitud: data.ubicacion_longitud,
+                localidad_desaparicion: localidad,
+                verificado: false,
+                fechanacimiento: data.fecha_nacimiento,
+                estado: {
+                    connect: { id: data.idestado || 1 } // Conectar con el estado usando su ID, 1 como valor por defecto
+                },
+                fechaactualizacion: new Date(), // Generar la fecha actual
+            },
+        });
+        return { success: true, id: desaparecido.id };
+    } catch (error) {
+        console.error('Error al actualizar el desaparecido:', error);
+        return { success: false, error };
+    }
 }
 
 // Eliminar un desaparecido por ID
@@ -416,7 +527,7 @@ const deleteDesaparecido = async (id) => {
 
 
 const desactivarDesaparecido = async (id) => {
-    return await prisma.publicacion.update({
+    const desaparecido = await prisma.publicacion.update({
         where: {
             id: parseInt(id),
         },
@@ -425,12 +536,18 @@ const desactivarDesaparecido = async (id) => {
                 connect: { id: 2 } // Conectar con el estado usando su ID
             }
         },
+        include:{
+            usuario: true
+        }
     });
+
+    resendService.correo_desactivar_publicación(desaparecido.usuario.email,`${desaparecido.usuario.nombre} ${desaparecido.usuario.apellido}`,desaparecido.nombredesaparecido);
+    return desaparecido;
 }
 
 
 const activarDesaparecido = async (id) => {
-    return await prisma.publicacion.update({
+    const desaparecido =  await prisma.publicacion.update({
         where: {
             id: parseInt(id),
         },
@@ -439,7 +556,33 @@ const activarDesaparecido = async (id) => {
                 connect: { id: 1 } // Conectar con el estado usando su ID
             }
         },
+        include:{
+            usuario: true
+        }
     });
+
+    resendService.correo_activar_publicación(desaparecido.usuario.email,`${desaparecido.usuario.nombre} ${desaparecido.usuario.apellido}`,desaparecido.nombredesaparecido);
+    return desaparecido;
+}
+
+const CerrarDesaparecido = async (id, tipoCierre) => {
+    const desaparecido = await prisma.publicacion.update({
+        where: {
+            id: parseInt(id),
+        },
+        data: {
+            estado: {
+                connect: { id: parseInt(tipoCierre) == 1 ? 4 : 5 } // Conectar con el estado usando su ID
+            }
+        },
+        include:{
+            usuario: true
+        }
+    });
+
+    resendService.correo_cerrar_publicacion(desaparecido.usuario.email,`${desaparecido.usuario.nombre} ${desaparecido.usuario.apellido}`,desaparecido.nombredesaparecido);
+
+    return desaparecido;
 }
 
 const verificarPublicacion = async (id) => {
@@ -453,6 +596,52 @@ const verificarPublicacion = async (id) => {
     });
 }
 
+const pruebaLocationService = async (latitude, longitude) => {
+
+    const publicaciones = await prisma.publicacion.findMany();
+    publicaciones.forEach(async (publicacion) => {
+        const location = locationService.getLocationsWithinRadius(latitude, longitude, publicacion.ubicacion_desaparicion_latitud, publicacion.ubicacion_desaparicion_longitud);
+        console.log(`Hay Radio 5KM: ${location}. Publicacion: ${publicacion.nombredesaparecido} - ${publicacion.id}`);
+    });
+}
+
+const enviarNotificacionUsuariosCercanos = async (latitude, longitude, nombreDesaparecido) => {
+    const dispositivos_activos = await prisma.ubicacion_usuario.findMany({include:{usuario:true}});
+    
+    let dispositivos_cercanos = [];
+    dispositivos_activos.forEach(async (dispositivo) => {
+        const location = locationService.getLocationsWithinRadius(latitude, longitude, dispositivo.ubicacion_latitud, dispositivo.ubicacion_longitud);
+        if (location) {
+            const message = {
+                to: dispositivo.usuario.id_notificacion_expo,
+                sound: 'default',
+                title: 'Persona Desaparecida en tu área',
+                body: `Se ha reportado la desaparición de ${nombreDesaparecido} en tu área. Ayuda a encontrarlo.`,
+                data: { someData: 'goes here' },
+                image: {uri: 'https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png'},
+              };
+              await fetch('https://exp.host/--/api/v2/push/send', {
+                method: 'POST',
+                headers: {
+                  Accept: 'application/json',
+                  'Accept-encoding': 'gzip, deflate',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+            });
+            console.log(`Hay Radio 5KM: ${location}. Dispositivo: ${dispositivo.id}`);
+        }
+    });
+
+    if(dispositivos_cercanos.length == 0){
+        console.log("No hay dispositivos cercanos");
+    }
+    else{
+        console.log("Dispositivos cercanos: ");
+        console.log(dispositivos_cercanos);
+    }
+    
+}
 
 // Exportar funciones
 module.exports = {
@@ -465,12 +654,15 @@ module.exports = {
     getDesaparecidosActivosScrollGrande,
     getDesaparecidosActivosScrollHorizontal,
     getDesaparecidosByUser,
-    getInfoDesaparecidoByID,
+    getInfoDesaparecidoByID_Movil,
+    getInfoDesaparecidoByID_BO,
     crearComentarioPublicaciones,
     getDesaparecidosTableBO,
     obtenerInformacionEditarPublicacionBO,
     updateDesaparecidoBO,
     desactivarDesaparecido,
     activarDesaparecido,
-    verificarPublicacion
+    verificarPublicacion,
+    CerrarDesaparecido,
+    pruebaLocationService,
 };

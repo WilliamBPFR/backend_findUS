@@ -107,7 +107,7 @@ model publicacion {
   idusuario                       Int?
   nombredesaparecido              String?            @db.VarChar(255)
   idtipodocumento                 Int?
-  numerodocumentodesaparecido     String?            @db.VarChar(11)
+  numerodocumentodesaparecido     String?
   edad                            Int?
   telefono                        String?            @db.VarChar(10)
   fechadesaparicion               DateTime?          @db.Timestamp(6)
@@ -141,6 +141,7 @@ model recursoeducativo {
   urlmaterial         String?
   fechacreacion       DateTime?          @default(now()) @db.Timestamp(6)
   fecha_modificacion  DateTime?          @db.Timestamp(6)
+  vistas              BigInt?
   categoriamaterial   categoriamaterial? @relation(fields: [idcategoriamaterial], references: [id], onDelete: NoAction, onUpdate: NoAction)
   estado              estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
   usuario             usuario?           @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -175,21 +176,23 @@ model usuario {
   apellido                  String?             @db.VarChar(255)
   email                     String?             @db.VarChar(255)
   fechanacimiento           DateTime?           @db.Timestamp(6)
-  numerotelefono            String?             @db.VarChar(255)
+  numerotelefono            String?
   urlfotoperfil             String?
   verificado                Boolean?
   codigoverificacionusuario String?             @db.VarChar(255)
   idtipodocumento           Int?
-  numerodocumento           String?             @db.VarChar(255)
+  numerodocumento           String?
   idrol                     Int?
   idestado                  Int?
   fechacreacion             DateTime?           @default(now()) @db.Timestamp(6)
+  id_notificacion_expo      String?
   avistamiento              avistamiento[]
   cambiarcontrasena         cambiarcontrasena[]
   chatpublicacion           chatpublicacion[]
   comentario                comentario[]
   publicacion               publicacion[]
   recursoeducativo          recursoeducativo[]
+  ubicacion_usuario         ubicacion_usuario[]
   estado                    estado?             @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
   rol                       rol?                @relation(fields: [idrol], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tipodocumento             tipodocumento?      @relation(fields: [idtipodocumento], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -206,4 +209,14 @@ model reporte {
   dia_inicio_conteo      DateTime? @default(now()) @db.Timestamp(6)
   dia_fin_conteo         DateTime? @default(now()) @db.Timestamp(6)
   activo                 Boolean?  @default(true)
+}
+
+model ubicacion_usuario {
+  id                     Int       @id @default(autoincrement())
+  idusuario              Int?
+  ubicacion_latitud      String?   @db.VarChar(255)
+  ubicacion_longitud     String?   @db.VarChar(255)
+  fechahoraactualizacion DateTime? @db.Timestamp(6)
+  fechacreacion          DateTime? @default(now()) @db.Timestamp(6)
+  usuario                usuario?  @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
