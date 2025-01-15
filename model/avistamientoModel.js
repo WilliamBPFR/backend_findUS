@@ -21,16 +21,12 @@ const crearAvistamiento = async (avistamiento_data,id_usuario) => {
             idestatus: 1,
             fechacreacion: new Date(),
 
+        },
+        include:{
+            publicacion: true
         }
     });
-
-    const publicacion = await prisma.publicacion.findFirst({
-        where:{
-            id: parseInt(avistamiento_data?.idPublicacion)
-        }
-    });
-
-    await enviarNotificacionUsuariosCercanos(avistamiento_data?.ubicacion_latitud,avistamiento_data?.ubicacion_longitud,publicacion.nombredesaparecido,publicacion.id);
+    await enviarNotificacionUsuariosCercanos(avistamiento_data?.ubicacion_latitud,avistamiento_data?.ubicacion_longitud,avistamiento.publicacion.nombredesaparecido,avistamiento.idpublicacion);
     
     return avistamiento;
 }
@@ -279,6 +275,7 @@ const enviarNotificacionUsuariosCercanos = async (latitude, longitude, nombreDes
                 body: JSON.stringify(message),
             });
             console.log(`Hay Radio 5KM: ${location}. Dispositivo: ${dispositivo.id}`);
+            dispositivos_cercanos.push(dispositivo);
         }
     });
 
