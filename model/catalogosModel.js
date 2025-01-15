@@ -155,7 +155,7 @@ const getEstadosPublicaciones = async () => {
                     tipoestado: "General"
                 },
                 {
-                    tipoestado: "Publicacion"
+                    tipoestado: "Publicación"
                 }
             ]
         }
