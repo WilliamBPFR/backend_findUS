@@ -41,7 +41,7 @@ const crearDesaparecido = async (desaparecido_data,user_id) => {
             }
         });
 
-        await enviarNotificacionUsuariosCercanos(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud,desaparecido_data.nombre_desaparecido);
+        await enviarNotificacionUsuariosCercanos(desaparecido_data.ubicacion_latitud,desaparecido_data.ubicacion_longitud,desaparecido_data.nombre_desaparecido, desaparecido?.id);
         await resendService.correo_crear_publicacion(desaparecido.usuario.email,`${desaparecido.usuario.nombre} ${desaparecido.usuario.apellido}`,desaparecido.nombredesaparecido);
         return { success: true, id: desaparecido.id };
     } catch (error) {
