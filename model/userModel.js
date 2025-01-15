@@ -546,12 +546,23 @@ const getEstadisticasPublicaciones = async (userId) => {
         }
     });
 
+    const totalPublicacionesCerradas = await prisma.publicacion.count({
+        where: {
+            idusuario: userId,
+            OR: [
+                { idestado: 4 },
+                { idestado: 5 }
+            ]
+        }
+    });
+
     return {
         totalPublicacionesHechas,
         totalPublicacionesActivas,
         totalPublicacionesInactivas,
         totalAvistamientosPublicados,
-        totalComentariosHechos
+        totalComentariosHechos,
+        totalPublicacionesCerradas
     };
 }
 

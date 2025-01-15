@@ -365,12 +365,13 @@ const crearComentarioPublicaciones = async (comentario,user_id) => {
     }
 }
 
-const getDesaparecidosTableBO = async (page,limit, filtros) => {
+const getDesaparecidosTableBO = async (page,limit, filtros,servicios_emergencias) => {
     const condiciones = [
         filtros?.nombreDesaparecido ? {nombredesaparecido : { contains: filtros?.nombreDesaparecido, mode: 'insensitive' }} : null,
         filtros?.fechaDesde ? {fechadesaparicion : { gte: new Date(filtros?.fechaDesde) }} : null,
         filtros?.fechaHasta ? {fechadesaparicion : { lte: new Date(filtros?.fechaHasta) }} : null,
-        filtros?.estatus ? {estado : { id: parseInt(filtros?.estatus) }} : null
+        filtros?.estatus ? {estado : { id: parseInt(filtros?.estatus) }} : null,
+        servicios_emergencias ? {estado : { id: 1 }} : null
     ].filter(condicion => condicion !== null); // Filtra valores `null`
 
 
@@ -397,7 +398,7 @@ const getDesaparecidosTableBO = async (page,limit, filtros) => {
         skip: (parseInt(page) - 1) * parseInt(limit),
         take: parseInt(limit)
     });
-
+    const estado = servicios_emergencias ? 1 : filtros?.estatus;
     const desaparecidosCount = await prisma.publicacion.count({
         where:{
             nombredesaparecido: filtros?.nombreDesaparecido ? { contains: filtros?.nombreDesaparecido, mode: 'insensitive' } : undefined,
@@ -405,7 +406,8 @@ const getDesaparecidosTableBO = async (page,limit, filtros) => {
                 gte: filtros?.fechaDesde ? new Date(filtros?.fechaDesde) : undefined,
                 lte: filtros?.fechaHasta ? new Date(filtros?.fechaHasta) : undefined,
             },
-            estado: filtros?.estatus ? { id: parseInt(filtros?.estatus) } : undefined
+            estado: (filtros?.estatus || servicios_emergencias) ? { id: parseInt(estado) } : undefined,
+            
         },
     });
 

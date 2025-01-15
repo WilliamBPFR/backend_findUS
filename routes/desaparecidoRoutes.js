@@ -10,7 +10,7 @@ router.get('/desaparecido/obtenerDesaparecidosByUser', authenticate, desaparecid
 router.post('/desaparecido/crearComentarioPublicaciones',authenticate, desaparecidoController.crearComentarioPublicaciones);
 
 
-router.get('/desaparecido/obtenerDesaparecidoTabla/:page/:limit', desaparecidoController.getDesaparecidosTableBO);
+router.get('/desaparecido/obtenerDesaparecidoTabla/:page/:limit/:servicios_emergencias', desaparecidoController.getDesaparecidosTableBO);
 router.get('/desaparecido/obtenerDesaparecido/:id', desaparecidoController.getDesaparecido);
 router.get('/desaparecido/obtenerDesaparecidos', desaparecidoController.getAllDesaparecidos);
 router.put('/desaparecido/updateDesaparecido/:id', desaparecidoController.updateDesaparecido);

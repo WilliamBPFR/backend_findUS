@@ -141,7 +141,7 @@ model recursoeducativo {
   urlmaterial         String?
   fechacreacion       DateTime?          @default(now()) @db.Timestamp(6)
   fecha_modificacion  DateTime?          @db.Timestamp(6)
-  vistas              BigInt?
+  vistas              Int?
   categoriamaterial   categoriamaterial? @relation(fields: [idcategoriamaterial], references: [id], onDelete: NoAction, onUpdate: NoAction)
   estado              estado?            @relation(fields: [idestado], references: [id], onDelete: NoAction, onUpdate: NoAction)
   usuario             usuario?           @relation(fields: [idusuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -209,6 +209,7 @@ model reporte {
   dia_inicio_conteo      DateTime? @default(now()) @db.Timestamp(6)
   dia_fin_conteo         DateTime? @default(now()) @db.Timestamp(6)
   activo                 Boolean?  @default(true)
+  total_usuarios_nuevos  Int?
 }
 
 model ubicacion_usuario {
