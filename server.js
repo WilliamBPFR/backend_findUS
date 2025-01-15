@@ -11,7 +11,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Endpoint de health check
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'UP', message: 'API ARRIBAAAAA - Version 3.0.0 - 14/01/2025' });
+    res.status(200).json({ status: 'UP', message: 'API ARRIBAAAAA - Version 3.1.0 - 15/01/2025' });
 });
 
 
