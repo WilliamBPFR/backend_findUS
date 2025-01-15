@@ -104,8 +104,8 @@ const getDesaparecidosTableBO = async (req,res) => {
     */
     try{
         const filtros = req.query;
-        // console.log("filtros",filtros);
-        const desaparecidos = await desaparecidoModel.getDesaparecidosTableBO(req.params.page,req.params.limit, filtros);
+        console.log("SERVICOS DE EMERGENCIA",req.params.servicios_emergencias);
+        const desaparecidos = await desaparecidoModel.getDesaparecidosTableBO(req.params.page,req.params.limit, filtros,req.params.servicios_emergencias === 'true');
         // console.log("desaparecidos",desaparecidos.totalPublicaciones);
         res.status(200).json(desaparecidos);
     }catch(error){

@@ -4,6 +4,7 @@ const recursosEducativosModel = require('../model/recursosEducativosModel');
 const obtenerRecursosEducativosActivos = async (req, res) => {
     // #swagger.tags = ['Recursos Educativos']
     try {
+        console.log("ENTRE A OBTENER LOS RECURSOS EDUCATIVOS")
         const recursos = await recursosEducativosModel.obtenerRecursosEducativosActivos(req.params.page, req.params.limit);
         res.status(200).json(recursos);
     } catch (error) {
