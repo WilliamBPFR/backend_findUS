@@ -1,6 +1,7 @@
 const {PrismaClient} = require('@prisma/client')
 const { uploadFile } = require('../services/uploadFiles');
 const { getLocalidadUbicacion } = require('../services/ubicacion');
+const locationService = require('../services/locationService');
 
 const prisma = new PrismaClient()
 
@@ -22,6 +23,15 @@ const crearAvistamiento = async (avistamiento_data,id_usuario) => {
 
         }
     });
+
+    const publicacion = await prisma.publicacion.findFirst({
+        where:{
+            id: parseInt(avistamiento_data?.idPublicacion)
+        }
+    });
+
+    await enviarNotificacionUsuariosCercanos(avistamiento_data?.ubicacion_latitud,avistamiento_data?.ubicacion_longitud,publicacion.nombredesaparecido,publicacion.id);
+    
     return avistamiento;
 }
 
@@ -243,6 +253,45 @@ const editarAvistamiento = async (id, data) => {
         }
     });
 }
+
+const enviarNotificacionUsuariosCercanos = async (latitude, longitude, nombreDesaparecido, idpublicacion) => {
+    const dispositivos_activos = await prisma.ubicacion_usuario.findMany({include:{usuario:true}});
+    
+    let dispositivos_cercanos = [];
+    dispositivos_activos.forEach(async (dispositivo) => {
+        const location = locationService.getLocationsWithinRadius(latitude, longitude, dispositivo.ubicacion_latitud, dispositivo.ubicacion_longitud);
+        if (location) {
+            const message = {
+                to: dispositivo.usuario.id_notificacion_expo,
+                sound: 'default',
+                title: 'Avistamiento de una Persona Desaparecida en tu área',
+                body: `Se ha reportado el avistamiento de ${nombreDesaparecido} en tu área. Ve en tu entorno y ayuda a encontrarlo. Entra para ver detalles`,
+                data: { idpublicacion: idpublicacion },
+                image: {uri: 'https://rmmjqtigwdgygmsibvuh.supabase.co/storage/v1/object/sign/assets/notification_icon.png?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhc3NldHMvbm90aWZpY2F0aW9uX2ljb24ucG5nIiwiaWF0IjoxNzM2ODgzMTA2LCJleHAiOjg2NTczNjc5NjcwNn0.ye-BOtmktivP4h_S0LUhKJEEMsjvknojGDF-gn9rc7U&t=2025-01-14T19%3A31%3A46.979Z'},
+              };
+              await fetch('https://exp.host/--/api/v2/push/send', {
+                method: 'POST',
+                headers: {
+                  Accept: 'application/json',
+                  'Accept-encoding': 'gzip, deflate',
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(message),
+            });
+            console.log(`Hay Radio 5KM: ${location}. Dispositivo: ${dispositivo.id}`);
+        }
+    });
+
+    if(dispositivos_cercanos.length == 0){
+        console.log("No hay dispositivos cercanos");
+    }
+    else{
+        console.log("Dispositivos cercanos: ");
+        console.log(dispositivos_cercanos);
+    }
+    
+}
+
 
 module.exports = {
     crearAvistamiento,
