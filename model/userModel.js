@@ -15,7 +15,7 @@ const crearUsuario = async (user_data) => {
         email: user_data.email,
         password: user_data.contrasena,
         options: {
-            emailRedirectTo: "http://localhost:3000/usuario_verificado"
+            emailRedirectTo: "https://findus-online.com/usuario_verificado"
         }
     });
     if (error) {
@@ -206,7 +206,7 @@ const solicitarCambiorContrasenaUsuario = async (email,isresend = false) => {
         
     }
 
-    const {data,error} = await supabaseAnon.auth.resetPasswordForEmail(email,{redirectTo: "http://localhost:3000/nuevaContrasena"});
+    const {data,error} = await supabaseAnon.auth.resetPasswordForEmail(email,{redirectTo: "https://findus-online.com/nuevaContrasena"});
     if(error){
         console.error('Error en la verificación del correo:', error);
         return { verificado: false, message: error.code };
