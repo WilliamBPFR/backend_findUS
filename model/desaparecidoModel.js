@@ -333,7 +333,24 @@ const getInfoDesaparecidoByID_BO = async (id) => {
             }
         }
     });
-    return publicacion;
+
+    const reporte_policia = await prisma.publicacion.findFirst({
+        where:{
+            id: parseInt(id),
+        },
+        select:{
+            fotospublicacion: {
+                select:{
+                    urlarchivo: true,
+                },
+                where:{
+                    idtipofotopublicacion: 2
+                }
+            }
+        }
+    });
+
+    return {...publicacion,reporte_policia: reporte_policia};
 
 }
 
